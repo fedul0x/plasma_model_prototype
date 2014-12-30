@@ -198,7 +198,9 @@ def potential_establish_method_2(prev_phi, next_phi, ro, epsilon=0.01):
             //next_phi[ijk] = tmp;
             //next_phi[ijk] = ijk + 1000*ijkm1 + 1000000*ijkp1;
             //next_phi[ijk] = 1000*ijk + 1000000*ijkm1 + ijkp1;
-            next_phi[ijk] = 100*ijk + 10000*ijm1k + ijp1k;
+            next_phi[ijk] = 1000*next_phi[ijk] + 1000000*next_phi[ijkm1
+             + next_phi[ijkp1];
+            //next_phi[ijk] = 100*ijk + 10000*ijm1k + ijp1k;
             //next_phi[ijk] = next_phi[ijk] + 1;
         }
     } 
