@@ -101,9 +101,9 @@ def make_boundary_conditions_for_potentials_2(phi, n, chargeGridElectron, charge
             for j in range(n[1]):
                 for k in range(n[2]):
                         if i-1>=n2[0] or j-1>=n2[1] or k-1>=n2[2] or i-1<0 or j-1<0 or k-1<0:
-                            prev_phi[i][j][k] = 50
+                            prev_phi[i][j][k] = phi
                             # next_phi[i][j][k] = 0
-                            next_phi[i][j][k] = 50
+                            next_phi[i][j][k] = phi
                         else:
                             ro = chargeGridElectron[i-1][j-1][k-1] + chargeGridCarbon[i-1][j-1][k-1] + chargeGridHelium[i-1][j-1][k-1]
                             prev_phi[i][j][k] = 4*np.pi*ro*deltaT_
@@ -198,7 +198,7 @@ def potential_establish_method_2(prev_phi, next_phi, ro, epsilon=0.01):
             //next_phi[ijk] = tmp;
             //next_phi[ijk] = ijk + 1000*ijkm1 + 1000000*ijkp1;
             //next_phi[ijk] = 1000*ijk + 1000000*ijkm1 + ijkp1;
-            next_phi[ijk] = 1000*next_phi[ijk] + 1000000*next_phi[ijkm1
+            next_phi[ijk] = 1000*next_phi[ijk] + 1000000*next_phi[ijkm1]
              + next_phi[ijkp1];
             //next_phi[ijk] = 100*ijk + 10000*ijm1k + ijp1k;
             //next_phi[ijk] = next_phi[ijk] + 1;
@@ -668,7 +668,7 @@ import time
 import shutil
 
 def make_dir_prefix():
-    prefix = './picts_cuda_{}'.format(time.strftime('%Y%m%d%H%M%S'))
+    prefix = './picts/picts_cuda_{}'.format(time.strftime('%Y%m%d%H%M%S'))
     # prefix = './picts_{}'.format(time.strftime('%Y%m%d%H'))#%M%S'))
     try:
         os.mkdir(prefix)

@@ -10,7 +10,7 @@ from numpy.random import rand
 # modelingTime = 100
 # modeling_time = 1200
 # modeling_time = 85
-modeling_time = 120
+modeling_time = 1200
 in_memory_time = 5
 # Электростатическая постоянная
 epsilon0 = 8.8541878E-12
@@ -18,9 +18,9 @@ epsilon0 = 8.8541878E-12
 # numbersElectron = 1E+10
 # numbersCarbon = 1E+16
 # numbersHelium = 1E+10
-numbersElectron = 1000
-numbersCarbon = 1000
-numbersHelium = 1000
+numbersElectron = 100
+numbersCarbon = 100
+numbersHelium = 100
 
 # Массы частиц
 massElectron = 9.11E-31
@@ -36,7 +36,7 @@ radiusCarbon = 31E-12
 radiusHelium = 91E-12
 # deltaT = 1.0E-12
 # deltaT = 1.0E-2
-deltaT = 0.001
+deltaT = 0.00001
 # deltaT = 1
 # Время метода установления
 # deltaT_ = 1.0E-12
@@ -62,9 +62,9 @@ xDimensionGrid = 1.0E-3
 yDimensionGrid = 1E-2
 zDimensionGrid = 1E-2
 # число шагов по сетке для крупных частиц
-xNumberStepGrid = 50  #im
-yNumberStepGrid = 50  #km
-zNumberStepGrid = 50  #lm
+xNumberStepGrid = 5  #im
+yNumberStepGrid = 5  #km
+zNumberStepGrid = 5  #lm
 xInitNumberStepGrid = 50  #imm
 yInitNumberStepGrid = 50  #kmm
 zInitNumberStepGrid = 50  #lmm
