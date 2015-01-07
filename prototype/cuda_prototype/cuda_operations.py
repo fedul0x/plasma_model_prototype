@@ -135,6 +135,158 @@ def potential_establish_method_3(prev_phi, next_phi, ro, epsilon=0.01):
     return (prev_phi, next_phi)
 
 
+def potential_establish_method_4(prev_phi, next_phi, ro, epsilon=0.01):
+    f = open('./kernel_code_with_flags.c', 'r')
+    mod = SourceModule("".join(f.readlines()))
+    n = prev_phi.shape
+    step = np.array([xStepGrid, yStepGrid, zStepGrid], dtype=np.float32)
+    sizes = np.array(n, dtype=np.int32)
+    potential_establish = mod.get_function("potential_establish")
+    print(n[0],n[1],n[2])
+    gd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/128)
+    if (gd != (n[0]-2)*(n[1]-2)*(n[2]-2)/128):
+        gd += 1
+
+    bd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/gd)
+    if (bd != (n[0]-2)*(n[1]-2)*(n[2]-2)/gd):
+        bd += 1
+    print('gd={}, bd = {} ===================='.format(gd, bd))
+    print('sizes={}'.format(sizes))
+    flags = np.zeros(n, dtype=np.float32)
+
+
+    prev_sum, next_sum = epsilon, 3 * epsilon
+    while np.abs(prev_sum - next_sum) > epsilon:
+        prev_sum, next_sum = 0, 0
+        potential_establish(
+            drv.InOut(prev_phi), drv.InOut(next_phi), drv.InOut(flags), drv.In(step), drv.In(sizes), 
+            block=(bd,1, 1), grid=(gd,1))
+        for i in range(1, n[0] - 1):
+            for j in range(1, n[1] - 1):
+                for k in range(1, n[2] - 1):
+                    prev_sum += prev_phi[i][j][k]
+                    next_sum += next_phi[i][j][k]
+        # for kk in range(prev_phi.shape[0]):
+        #     print(next_phi[kk])
+            # plt.contourf(next_phi[kk])
+            # plt.show()
+        break
+        print('{}>{}'.format(np.abs(prev_sum - next_sum), epsilon))
+        # for kk in range(next_phi.shape[0]):
+        #     print(next_phi[kk])
+
+    # for i in range(flags.shape[0]):
+    #     # cs = plt.contourf(flags[i])
+    #     cs=plt.imshow(flags[i], interpolation='nearest')
+    #     plt.colorbar(cs)
+    #     plt.show()
+
+    return (prev_phi, next_phi)
+
+def potential_establish_method_5(prev_phi, next_phi, ro, epsilon=0.01):
+    f = open('./kernel_code_sync_blocks.c', 'r')
+    mod = SourceModule("".join(f.readlines()))
+    n = prev_phi.shape
+    step = np.array([xStepGrid, yStepGrid, zStepGrid], dtype=np.float32)
+    sizes = np.array(n, dtype=np.int32)
+    potential_establish = mod.get_function("potential_establish")
+    print(n[0],n[1],n[2])
+    gd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/256)
+    if (gd != (n[0]-2)*(n[1]-2)*(n[2]-2)/256):
+        gd += 1
+
+    bd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/gd)
+    if (bd != (n[0]-2)*(n[1]-2)*(n[2]-2)/gd):
+        bd += 1
+    print('gd={}, bd = {} ===================='.format(gd, bd))
+    print('sizes={}'.format(sizes))
+    # return
+    # flags = np.zeros(n, dtype=np.float32)
+
+
+    prev_sum, next_sum = epsilon, 3 * epsilon
+    while np.abs(prev_sum - next_sum) > epsilon:
+        prev_sum, next_sum = 0, 0
+        potential_establish(
+            drv.InOut(prev_phi), drv.InOut(next_phi), drv.In(step), drv.In(sizes), 
+            block=(bd,1, 1), grid=(gd,1))
+        for i in range(1, n[0] - 1):
+            for j in range(1, n[1] - 1):
+                for k in range(1, n[2] - 1):
+                    prev_sum += prev_phi[i][j][k]
+                    next_sum += next_phi[i][j][k]
+        # for kk in range(prev_phi.shape[0]):
+        #     print(next_phi[kk])
+            # plt.contourf(next_phi[kk])
+            # plt.show()
+        # break
+        print(next_phi[0][0][0])
+        print('{}>{}'.format(np.abs(prev_sum - next_sum), epsilon))
+        # for kk in range(next_phi.shape[0]):
+        #     print(next_phi[kk])
+
+    # for i in range(flags.shape[0]):
+    #     # cs = plt.contourf(flags[i])
+    #     cs=plt.imshow(flags[i], interpolation='nearest')
+    #     plt.colorbar(cs)
+    #     plt.show()
+
+    return (prev_phi, next_phi)
+
+def potential_establish_method_6(prev_phi, next_phi, ro, epsilon=0.01):
+    f = open('./kernel_code_one_start.c', 'r')
+    mod = SourceModule("".join(f.readlines()))
+    n = prev_phi.shape
+    step = np.array([xStepGrid, yStepGrid, zStepGrid], dtype=np.float32)
+    sizes = np.array(n, dtype=np.int32)
+    potential_establish = mod.get_function("potential_establish")
+    print(n[0],n[1],n[2])
+    gd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/512)
+    if (gd != (n[0]-2)*(n[1]-2)*(n[2]-2)/512):
+        gd += 1
+
+    bd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/gd)
+    if (bd != (n[0]-2)*(n[1]-2)*(n[2]-2)/gd):
+        bd += 1
+    print('gd={}, bd = {} ===================='.format(gd, bd))
+    print('sizes={}'.format(sizes))
+
+
+    prev_sum, next_sum = epsilon, 3 * epsilon
+    subSum = np.array([3 * epsilon], dtype=np.float32)
+    while subSum[0] > epsilon:
+        potential_establish(
+            drv.InOut(prev_phi), drv.InOut(next_phi), drv.InOut(subSum), 
+            drv.In(step), drv.In(sizes), 
+            block=(bd,1, 1), grid=(gd,1))
+        subSum[0] = 0.0
+        potential_establish(
+            drv.InOut(next_phi), drv.InOut(prev_phi), drv.InOut(subSum), 
+            drv.In(step), drv.In(sizes), 
+            block=(bd,1, 1), grid=(gd,1))
+        # for i in range(1, n[0] - 1):
+        #     for j in range(1, n[1] - 1):
+        #         for k in range(1, n[2] - 1):
+        #             prev_sum += prev_phi[i][j][k]
+        #             next_sum += next_phi[i][j][k]
+        # for kk in range(prev_phi.shape[0]):
+        #     print(next_phi[kk])
+            # plt.contourf(next_phi[kk])
+            # plt.show()
+        # print('{}>{}'.format(np.abs(prev_sum - next_sum), epsilon))
+        print('{}>{}'.format(np.abs(subSum[0]), epsilon))
+        # for kk in range(next_phi.shape[0]):
+        #     print(next_phi[kk])
+
+    # for i in range(flags.shape[0]):
+    #     # cs = plt.contourf(flags[i])
+    #     cs=plt.imshow(flags[i], interpolation='nearest')
+    #     plt.colorbar(cs)
+    #     plt.show()
+
+    return (prev_phi, next_phi)
+
+
 def main():
     # Границы сетки
     xRange = np.linspace(0, xDimensionGrid, xNumberStepGrid + 1)
@@ -153,15 +305,20 @@ def main():
     #         for k in range(1, n[2] - 1):
     #             ro[i][j][k] = chargeGridElectron[i-1][j-1][k-1] + chargeGridCarbon[i-1][j-1][k-1] + chargeGridHelium[i-1][j-1][k-1]
     print('THIS IS START OF potential_establish_method_2')
-    prev_phi, next_phi = potential_establish_method_3(prev_phi, next_phi, ro, epsilon=0.01)
+    prev_phi, next_phi = potential_establish_method_6(prev_phi, next_phi, ro, epsilon=0.001)
     print('THIS IS END OF potential_establish_method_2')
 
-    for i in range(next_phi.shape[0]):
-        # print(next_phi[i])
-        cs = plt.contourf(next_phi[i])#, levels=[0, 10, 20, 30, 40, 45, 46, 47, 48, 49, 50, 51, 52])
-        print(cs.levels)
+    for i in range(next_phi.shape[2]):
+        print(next_phi[i, 1:-1, 1:-1])
+        cs=plt.imshow(next_phi[i, 1:-1, 1:-1], interpolation='nearest')
         plt.colorbar(cs)
         plt.show()
+        
+        # print(next_phi[i, 1:-1, 1:-1])
+        # cs = plt.contourf(next_phi[i, 1:-1, 1:-1])#, levels=[0, 10, 20, 30, 40, 45, 46, 47, 48, 49, 50, 51, 52])
+        # print(cs.levels)
+        # plt.colorbar(cs)
+        # plt.show()
 
 if __name__ == '__main__':
     main()

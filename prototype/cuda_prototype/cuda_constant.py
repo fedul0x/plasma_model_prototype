@@ -62,9 +62,9 @@ xDimensionGrid = 1.0E-3
 yDimensionGrid = 1E-2
 zDimensionGrid = 1E-2
 # число шагов по сетке для крупных частиц
-xNumberStepGrid = 5  #im
-yNumberStepGrid = 5  #km
-zNumberStepGrid = 5  #lm
+xNumberStepGrid = 5 #im
+yNumberStepGrid = 5 #km
+zNumberStepGrid = 5 #lm
 xInitNumberStepGrid = 50  #imm
 yInitNumberStepGrid = 50  #kmm
 zInitNumberStepGrid = 50  #lmm

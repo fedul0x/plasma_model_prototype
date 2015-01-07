@@ -12,8 +12,8 @@ __global__ void potential_establish(float *prev_phi, float *next_phi, float *ste
     const int z_dim = matrix_size[2];
 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    // if (index >= (x_dim - 2) * (y_dim - 2) * (z_dim - 2))
-    //     return;
+    if (index >= (x_dim - 2) * (y_dim - 2) * (z_dim - 2))
+        return;
     int i = (int) (index / (z_dim - 2) / (y_dim - 2)) + 1;
     int j = ((int) (index / (z_dim - 2))) % (y_dim - 2) + 1;
     int k = index % (z_dim - 2) + 1;
@@ -21,16 +21,18 @@ __global__ void potential_establish(float *prev_phi, float *next_phi, float *ste
     const float x_step = step[0];
     const float y_step = step[1];
     const float z_step = step[2];
+    // __shared__ int indexes[7];
+    
 
-    int ijk = i * z_dim * y_dim + j * z_dim + k;
-    int im1jk = (i - 1) * z_dim * y_dim + j * z_dim + k;
-    int ijm1k = i * z_dim * y_dim + (j - 1) * z_dim + k;
-    int ijkm1 = i * z_dim * y_dim + j * z_dim + k - 1;
-    //int ijkm1 = ijk - 1;
-    int ip1jk = (i + 1) * z_dim * y_dim + j * z_dim + k;
-    int ijp1k = i * z_dim * y_dim + (j + 1) * z_dim + k;
-    int ijkp1 = i * z_dim * y_dim + j * z_dim + k + 1;
-    //int ijkp1 = ijk + 1;
+    __shared__ int ijk;
+    __shared__ int im1jk;
+    __shared__ int ijm1k;
+    __shared__ int ijkm1;
+    //__shared__ int ijkm1;
+    __shared__ int ip1jk;
+    __shared__ int ijp1k;
+    __shared__ int ijkp1;
+    //__shared__ int ijkp1;
     float tmp = prev_phi[ijk];
     float ro = 1E-17;
     float precision = 0;
@@ -38,20 +40,20 @@ __global__ void potential_establish(float *prev_phi, float *next_phi, float *ste
     //for (int l = 0; l <= 5; l++)
     {
         index = blockIdx.x * blockDim.x + threadIdx.x;
-        //for (int l = 0; l<20; l++)
-         while (index < limit)
+        for (int l = 0; l<2; l++)
+         // while (index < limit)
         {
-            // i = (int) (index / (z_dim - 2) / (y_dim - 2)) + 1;
-            // j = ((int) (index / (z_dim - 2))) % (y_dim - 2) + 1;
-            // k = index % (z_dim - 2) + 1;
+            i = (int) (index / (z_dim - 2) / (y_dim - 2)) + 1;
+            j = ((int) (index / (z_dim - 2))) % (y_dim - 2) + 1;
+            k = index % (z_dim - 2) + 1;
 
-            // ijk = i * z_dim * y_dim + j * z_dim + k;
-            // im1jk = (i - 1) * z_dim * y_dim + j * z_dim + k;
-            // ijm1k = i * z_dim * y_dim + (j - 1) * z_dim + k;
-            // ijkm1 = i * z_dim * y_dim + j * z_dim + k - 1;
-            // ip1jk = (i + 1) * z_dim * y_dim + j * z_dim + k;
-            // ijp1k = i * z_dim * y_dim + (j + 1) * z_dim + k;
-            // ijkp1 = i * z_dim * y_dim + j * z_dim + k + 1;
+            ijk = i * z_dim * y_dim + j * z_dim + k;
+            im1jk = (i - 1) * z_dim * y_dim + j * z_dim + k;
+            ijm1k = i * z_dim * y_dim + (j - 1) * z_dim + k;
+            ijkm1 = i * z_dim * y_dim + j * z_dim + k - 1;
+            ip1jk = (i + 1) * z_dim * y_dim + j * z_dim + k;
+            ijp1k = i * z_dim * y_dim + (j + 1) * z_dim + k;
+            ijkp1 = i * z_dim * y_dim + j * z_dim + k + 1;
 
             // tmp = prev_phi[ijk];
             // prev_phi[ijk] = tmp;
@@ -64,7 +66,7 @@ __global__ void potential_establish(float *prev_phi, float *next_phi, float *ste
             __syncthreads();
             next_phi[ijk] = tmp;
             prev_phi[ijk] = tmp;
-            index += 512;
+            // index += 512;
         }
     }
 }
