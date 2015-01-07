@@ -241,8 +241,8 @@ def potential_establish_method_6(prev_phi, next_phi, ro, epsilon=0.01):
     sizes = np.array(n, dtype=np.int32)
     potential_establish = mod.get_function("potential_establish")
     print(n[0],n[1],n[2])
-    gd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/512)
-    if (gd != (n[0]-2)*(n[1]-2)*(n[2]-2)/512):
+    gd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/300)
+    if (gd != (n[0]-2)*(n[1]-2)*(n[2]-2)/300):
         gd += 1
 
     bd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/gd)
@@ -251,19 +251,25 @@ def potential_establish_method_6(prev_phi, next_phi, ro, epsilon=0.01):
     print('gd={}, bd = {} ===================='.format(gd, bd))
     print('sizes={}'.format(sizes))
 
-
-    prev_sum, next_sum = epsilon, 3 * epsilon
-    subSum = np.array([3 * epsilon], dtype=np.float32)
-    while subSum[0] > epsilon:
+    subSum = np.zeros((gd, ), dtype=np.float32)
+    ssum = 3 * epsilon
+    while ssum > epsilon:
         potential_establish(
             drv.InOut(prev_phi), drv.InOut(next_phi), drv.InOut(subSum), 
             drv.In(step), drv.In(sizes), 
             block=(bd,1, 1), grid=(gd,1))
-        subSum[0] = 0.0
+        for s in range(subSum.shape[0]):
+            subSum[s] = 0.0
         potential_establish(
             drv.InOut(next_phi), drv.InOut(prev_phi), drv.InOut(subSum), 
             drv.In(step), drv.In(sizes), 
             block=(bd,1, 1), grid=(gd,1))
+        ssum = 0
+        for s in subSum:
+            ssum += s
+        # print(subSum)
+        # print(ssum)
+        # break
         # for i in range(1, n[0] - 1):
         #     for j in range(1, n[1] - 1):
         #         for k in range(1, n[2] - 1):
@@ -274,7 +280,7 @@ def potential_establish_method_6(prev_phi, next_phi, ro, epsilon=0.01):
             # plt.contourf(next_phi[kk])
             # plt.show()
         # print('{}>{}'.format(np.abs(prev_sum - next_sum), epsilon))
-        print('{}>{}'.format(np.abs(subSum[0]), epsilon))
+        print('{}>{}'.format(ssum, epsilon))
         # for kk in range(next_phi.shape[0]):
         #     print(next_phi[kk])
 
