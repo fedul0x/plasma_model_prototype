@@ -1,5 +1,7 @@
 #include <math.h>
 
+
+
 __device__ __host__ float dif(float x, float y, float z, float step)
 {
     return (x - 2 * y + z) / step / step;
@@ -8,6 +10,7 @@ __device__ __host__ float dif(float x, float y, float z, float step)
 //TODO change step and matrix_size to vector
 __global__ void potential_establish(float *prev_phi, float *next_phi, float *sum, float *step, int *matrix_size )
 {
+    __shared__ float sums[300];
     const int x_dim = matrix_size[0];
     const int y_dim = matrix_size[1];
     const int z_dim = matrix_size[2];
@@ -39,19 +42,16 @@ __global__ void potential_establish(float *prev_phi, float *next_phi, float *sum
               dif(prev_phi[ijkp1], prev_phi[ijk], prev_phi[ijkm1], z_step) +
               4 * M_PI * ro) + prev_phi[ijk];
     next_phi[ijk] = tmp;
+   sums[threadIdx.x] = abs(next_phi[ijk] - prev_phi[ijk]);
     __syncthreads();
+
+    // sum[blockIdx.x] = 0;
     if (threadIdx.x == 0)
     {
-        // int offset = 0;
         for (int offset = 0; offset < blockDim.x; offset++)
         {
-            index += 1;
-            i = (int) (index / (z_dim - 2) / (y_dim - 2)) + 1;
-            j = ((int) (index / (z_dim - 2))) % (y_dim - 2) + 1;
-            k = index % (z_dim - 2) + 1;
-            ijk = i * z_dim * y_dim + j * z_dim + k;
-            sum[blockIdx.x] += abs(next_phi[ijk] - prev_phi[ijk]);
+            sum[blockIdx.x] += sums[offset];
         }
-
     }
+
 }

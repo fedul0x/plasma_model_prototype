@@ -10,6 +10,7 @@ import pycuda.autoinit
 import numpy
 from pycuda.compiler import SourceModule
 from cuda_constant import *
+import time
 
 
 # import pdb
@@ -234,8 +235,9 @@ def potential_establish_method_5(prev_phi, next_phi, ro, epsilon=0.01):
     return (prev_phi, next_phi)
 
 def potential_establish_method_6(prev_phi, next_phi, ro, epsilon=0.01):
-    f = open('./kernel_code_one_start.c', 'r')
-    mod = SourceModule("".join(f.readlines()))
+    # f = open('./kernel_code_one_start.cu', 'r')
+    f = open('./kernel_code_one_start_shared_sum.cu', 'r')
+    mod = SourceModule("".join(f.readlines()))#, options=['-ptx'])
     n = prev_phi.shape
     step = np.array([xStepGrid, yStepGrid, zStepGrid], dtype=np.float32)
     sizes = np.array(n, dtype=np.int32)
@@ -254,6 +256,7 @@ def potential_establish_method_6(prev_phi, next_phi, ro, epsilon=0.01):
     subSum = np.zeros((gd, ), dtype=np.float32)
     ssum = 3 * epsilon
     while ssum > epsilon:
+        # 
         potential_establish(
             drv.InOut(prev_phi), drv.InOut(next_phi), drv.InOut(subSum), 
             drv.In(step), drv.In(sizes), 
@@ -310,9 +313,12 @@ def main():
     #     for j in range(1, n[1] - 1):
     #         for k in range(1, n[2] - 1):
     #             ro[i][j][k] = chargeGridElectron[i-1][j-1][k-1] + chargeGridCarbon[i-1][j-1][k-1] + chargeGridHelium[i-1][j-1][k-1]
+    start = time.time()
     print('THIS IS START OF potential_establish_method_2')
     prev_phi, next_phi = potential_establish_method_6(prev_phi, next_phi, ro, epsilon=0.001)
     print('THIS IS END OF potential_establish_method_2')
+    end = time.time()
+    print('Elapsed time = {}'.format(end-start))
 
     for i in range(next_phi.shape[2]):
         print(next_phi[i, 1:-1, 1:-1])

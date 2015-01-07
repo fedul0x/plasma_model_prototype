@@ -40,18 +40,20 @@ __global__ void potential_establish(float *prev_phi, float *next_phi, float *sum
               4 * M_PI * ro) + prev_phi[ijk];
     next_phi[ijk] = tmp;
     __syncthreads();
-    if (threadIdx.x == 0)
+    sum[blockIdx.x] += abs(next_phi[ijk] - prev_phi[ijk]);
+    
+    // if (threadIdx.x == 0)
     {
         // int offset = 0;
-        for (int offset = 0; offset < blockDim.x; offset++)
-        {
-            index += 1;
-            i = (int) (index / (z_dim - 2) / (y_dim - 2)) + 1;
-            j = ((int) (index / (z_dim - 2))) % (y_dim - 2) + 1;
-            k = index % (z_dim - 2) + 1;
-            ijk = i * z_dim * y_dim + j * z_dim + k;
-            sum[blockIdx.x] += abs(next_phi[ijk] - prev_phi[ijk]);
-        }
+        // for (int offset = 0; offset < blockDim.x; offset++)
+        // {
+        //     index += 1;
+        //     i = (int) (index / (z_dim - 2) / (y_dim - 2)) + 1;
+        //     j = ((int) (index / (z_dim - 2))) % (y_dim - 2) + 1;
+        //     k = index % (z_dim - 2) + 1;
+        //     ijk = i * z_dim * y_dim + j * z_dim + k;
+        //     sum[blockIdx.x] += abs(next_phi[ijk] - prev_phi[ijk]);
+        // }
 
     }
 }
