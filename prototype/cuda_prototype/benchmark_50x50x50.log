@@ -1,0 +1,290 @@
+
+Method: bm_kernel_1.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1148.2078022956848
+
+Method: bm_kernel_1.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1132.4485766887665
+
+Method: bm_kernel_1.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1114.3772430419922
+
+Method: bm_kernel_1.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1136.260819196701
+
+Method: bm_kernel_1.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1134.9238216876984
+
+Method: bm_kernel_1.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1142.5751860141754
+
+Method: bm_kernel_1.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1138.2528007030487
+
+Method: bm_kernel_1.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1160.559401512146
+
+Method: bm_kernel_1.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1152.5951764583588
+
+Method: bm_kernel_1.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1142.5989074707031
+
+Method: bm_kernel_2.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 2364.673624753952
+
+Method: bm_kernel_2.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 2101.0529754161835
+
+Method: bm_kernel_2.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1900.6500692367554
+
+Method: bm_kernel_2.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 2174.095222234726
+
+Method: bm_kernel_2.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1909.8661360740662
+
+Method: bm_kernel_2.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1906.9354603290558
+
+Method: bm_kernel_2.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1909.031888961792
+
+Method: bm_kernel_2.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1905.0510637760162
+
+Method: bm_kernel_2.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1908.377586364746
+
+Method: bm_kernel_2.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1912.0754389762878
+
+Method: bm_kernel_3.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1940.102091550827
+
+Method: bm_kernel_3.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1961.477382183075
+
+Method: bm_kernel_3.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1929.2897584438324
+
+Method: bm_kernel_3.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1910.1766571998596
+
+Method: bm_kernel_3.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1967.0646178722382
+
+Method: bm_kernel_3.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1930.908311843872
+
+Method: bm_kernel_3.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1933.4875411987305
+
+Method: bm_kernel_3.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1940.2291634082794
+
+Method: bm_kernel_3.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1934.2146978378296
+
+Method: bm_kernel_3.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 1949.6571424007416
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 145.16309785842896
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 158.58421564102173
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 159.39792037010193
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 159.16661071777344
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 159.52005243301392
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 159.60644841194153
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 161.46923565864563
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 160.1197247505188
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 160.23606705665588
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (51, 51, 51)
+gd=443, bd = 300
+Iteration count = 5410
+Elapsed time = 159.81663632392883
+
+Method: None
+Bounds: (51, 51, 51)
+Iteration count = 5409
+Elapsed time = 51528.974937200546
+
+Method: None
+Bounds: (51, 51, 51)
+Iteration count = 5409
+Elapsed time = 50641.864661216736
+
+Method: None
+Bounds: (51, 51, 51)
+Iteration count = 5409
+Elapsed time = 50860.18099474907
+
+Method: None
+Bounds: (51, 51, 51)
+Iteration count = 5409
+Elapsed time = 71778.46217107773
+
+Method: None
+Bounds: (51, 51, 51)
+Iteration count = 5409
+Elapsed time = 54367.85997772217
+
+Method: None
+Bounds: (51, 51, 51)
+Iteration count = 5409
+Elapsed time = 54456.56836771965
+
+Method: None
+Bounds: (51, 51, 51)
+Iteration count = 5409
+Elapsed time = 51364.784078359604
+
+Method: None
+Bounds: (51, 51, 51)
+Iteration count = 5409
+Elapsed time = 50583.72734284401
+
+Method: None
+Bounds: (51, 51, 51)
+Iteration count = 5409
+Elapsed time = 51117.909962415695
+
+Method: None
+Bounds: (51, 51, 51)
+Iteration count = 5409
+Elapsed time = 72571.19282507896

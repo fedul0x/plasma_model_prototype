@@ -267,8 +267,6 @@ def potential_establish_method_6(prev_phi, next_phi, ro, epsilon=0.01):
             drv.InOut(next_phi), drv.InOut(prev_phi), drv.InOut(subSum), 
             drv.In(step), drv.In(sizes), 
             block=(bd,1, 1), grid=(gd,1))
-        print(subSum)
-        # return
         ssum = 0
         for s in subSum:
             ssum += s
@@ -297,81 +295,6 @@ def potential_establish_method_6(prev_phi, next_phi, ro, epsilon=0.01):
 
     return (prev_phi, next_phi)
 
-def potential_establish_method_7(prev_phi, next_phi, ro, epsilon=0.01):
-    # f = open('./kernel_code_one_start.cu', 'r')
-    # mem = cuda.mem_alloc(size)
-    f = open('./kernel_code_one_start_shared_sum.cu', 'r')
-    mod = SourceModule("".join(f.readlines()))#, options=['-ptx'])
-    n = prev_phi.shape
-    step = np.array([xStepGrid, yStepGrid, zStepGrid], dtype=np.float32)
-    sizes = np.array(n, dtype=np.int32)
-    potential_establish = mod.get_function("potential_establish")
-    print(n[0],n[1],n[2])
-    gd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/300)
-    if (gd != (n[0]-2)*(n[1]-2)*(n[2]-2)/300):
-        gd += 1
-
-    bd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/gd)
-    if (bd != (n[0]-2)*(n[1]-2)*(n[2]-2)/gd):
-        bd += 1
-    print('gd={}, bd = {} ===================='.format(gd, bd))
-    print('sizes={}'.format(sizes))
-
-    # tr = mo d.get_texref("my_tex")
-    # tr.set_address(mem, size)
-
-    # a = numpy.random.randn(4,4).astype(numpy.foat32)
-    prev_phi_gpu = drv.mem_alloc((prev_phi.size+1) * prev_phi.dtype.itemsize)
-    next_phi_gpu = drv.mem_alloc((next_phi.size+1) * next_phi.dtype.itemsize)
-    drv.memcpy_htod(prev_phi_gpu, prev_phi)
-    drv.memcpy_htod(next_phi_gpu, next_phi)
-
-    subSum = np.zeros((gd, ), dtype=np.float32)
-    ssum = 4 * epsilon
-    while ssum > epsilon:
-        potential_establish(
-            # drv.InOut(prev_phi), drv.InOut(next_phi), drv.InOut(subSum), 
-            prev_phi_gpu, next_phi_gpu, drv.InOut(subSum), 
-            drv.In(step), drv.In(sizes), 
-            block=(bd,1, 1), grid=(gd,1))
-        for s in range(subSum.shape[0]):
-            subSum[s] = 0.0
-        potential_establish(
-            # drv.InOut(prev_phi), drv.InOut(next_phi), drv.InOut(subSum), 
-            next_phi_gpu, prev_phi_gpu, drv.InOut(subSum), 
-            drv.In(step), drv.In(sizes), 
-            block=(bd,1, 1), grid=(gd,1))
-        ssum = 0
-        for s in subSum:
-            ssum += s
-        # print(subSum)
-        # print(ssum)
-        # break
-        # for i in range(1, n[0] - 1):
-        #     for j in range(1, n[1] - 1):
-        #         for k in range(1, n[2] - 1):
-        #             prev_sum += prev_phi[i][j][k]
-        #             next_sum += next_phi[i][j][k]
-        # for kk in range(prev_phi.shape[0]):
-        #     print(next_phi[kk])
-            # plt.contourf(next_phi[kk])
-            # plt.show()
-        # print('{}>{}'.format(np.abs(prev_sum - next_sum), epsilon))
-        # print('{}>{}'.format(ssum, epsilon))
-        # for kk in range(next_phi.shape[0]):
-        #     print(next_phi[kk])
-
-    # for i in range(flags.shape[0]):
-    #     # cs = plt.contourf(flags[i])
-    #     cs=plt.imshow(flags[i], interpolation='nearest')
-    #     plt.colorbar(cs)
-    #     plt.show()
-    # cuda.memcpy_htod(prev_phi_gpu, prev_phi)
-    # cuda.memcpy_htod(next_phi_gpu, next_phi)
-    drv.memcpy_dtoh(prev_phi, prev_phi_gpu)
-    drv.memcpy_dtoh(next_phi, next_phi_gpu)
-    return (prev_phi, next_phi)
-
 
 def main():
     # Границы сетки
@@ -391,12 +314,12 @@ def main():
     #         for k in range(1, n[2] - 1):
     #             ro[i][j][k] = chargeGridElectron[i-1][j-1][k-1] + chargeGridCarbon[i-1][j-1][k-1] + chargeGridHelium[i-1][j-1][k-1]
     start = time.time()
-    print('THIS IS START OF potential_establish_method_7')
-    prev_phi, next_phi = potential_establish_method_7(prev_phi, next_phi, ro, epsilon=0.1)
-    print('THIS IS END OF potential_establish_method_7')
+    print('THIS IS START OF potential_establish_method_2')
+    prev_phi, next_phi = potential_establish_method_6(prev_phi, next_phi, ro, epsilon=0.001)
+    print('THIS IS END OF potential_establish_method_2')
     end = time.time()
     print('Elapsed time = {}'.format(end-start))
-    return 
+
     for i in range(next_phi.shape[2]):
         print(next_phi[i, 1:-1, 1:-1])
         cs=plt.imshow(next_phi[i, 1:-1, 1:-1], interpolation='nearest')

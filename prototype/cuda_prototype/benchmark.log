@@ -1,0 +1,267 @@
+
+Method: bm_kernel_1.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 145.9870765209198
+
+Method: bm_kernel_1.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 142.49354314804077
+
+Method: bm_kernel_1.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 141.886159658432
+
+Method: bm_kernel_1.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 138.21465396881104
+
+Method: bm_kernel_1.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 141.05868411064148
+
+Method: bm_kernel_1.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 140.76081943511963
+
+Method: bm_kernel_1.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 147.63597679138184
+
+Method: bm_kernel_1.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 164.01326966285706
+
+Method: bm_kernel_1.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 146.15868425369263
+
+Method: bm_kernel_1.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 196.84817337989807
+
+Method: bm_kernel_2.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 449.75748682022095
+
+Method: bm_kernel_2.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 417.2357144355774
+
+Method: bm_kernel_2.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 415.4598286151886
+
+Method: bm_kernel_2.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 420.5821557044983
+
+Method: bm_kernel_2.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 420.0162944793701
+
+Method: bm_kernel_2.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 411.38378143310547
+
+Method: bm_kernel_2.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 416.2552947998047
+
+Method: bm_kernel_2.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 418.29432559013367
+
+Method: bm_kernel_2.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 418.0798556804657
+
+Method: bm_kernel_2.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 417.7717444896698
+
+Method: bm_kernel_3.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 417.45300817489624
+
+Method: bm_kernel_3.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 418.2105996608734
+
+Method: bm_kernel_3.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 417.6534478664398
+
+Method: bm_kernel_3.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 417.3664782047272
+
+Method: bm_kernel_3.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 417.3596086502075
+
+Method: bm_kernel_3.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 417.3155093193054
+
+Method: bm_kernel_3.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 416.8732054233551
+
+Method: bm_kernel_3.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 399.53038787841797
+
+Method: bm_kernel_3.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 399.24508023262024
+
+Method: bm_kernel_3.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 398.8490855693817
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 26.1206693649292
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 26.0426824092865
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 26.141597986221313
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 26.055196523666382
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 26.18040943145752
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 26.188182830810547
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 25.87510848045349
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 26.081263303756714
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 26.067052125930786
+
+Method: kernel_code_one_start_shared_sum.cu
+Bounds: (26, 26, 26)
+gd=59, bd = 298
+Iteration count = 4506
+Elapsed time = 26.00624108314514
+
+Method: None
+Bounds: (26, 26, 26)
+Iteration count = 4505
+Elapsed time = 5606.8184361457825
+
+Method: None
+Bounds: (26, 26, 26)
+Iteration count = 4505
+Elapsed time = 5601.892058134079
+
+Method: None
+Bounds: (26, 26, 26)
+Iteration count = 4505
+Elapsed time = 5600.977062225342
+
+Method: None
+Bounds: (26, 26, 26)
+Iteration count = 4505
+Elapsed time = 5593.334084749222
+
+Method: None
+Bounds: (26, 26, 26)
+Iteration count = 4505
+Elapsed time = 5569.420530796051
+
+

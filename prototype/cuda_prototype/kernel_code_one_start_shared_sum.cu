@@ -42,7 +42,7 @@ __global__ void potential_establish(float *prev_phi, float *next_phi, float *sum
               dif(prev_phi[ijkp1], prev_phi[ijk], prev_phi[ijkm1], z_step) +
               4 * M_PI * ro) + prev_phi[ijk];
     next_phi[ijk] = tmp;
-   sums[threadIdx.x] = abs(next_phi[ijk] - prev_phi[ijk]);
+    sums[threadIdx.x] = abs(next_phi[ijk] - prev_phi[ijk]);
     __syncthreads();
 
     // sum[blockIdx.x] = 0;
