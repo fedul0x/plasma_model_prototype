@@ -22,8 +22,15 @@ def p_prev_time(time):
 
 ''' Maxwell distribution randomizer '''
 class MWranomizer(scipy.stats.rv_continuous):
-    def _pdf(self, v, n, m, k, T):
+    def __init__(self):
+        scipy.stats.rv_continuous.__init__(self)
+        self.a = 0
+
+    def _pdf(self, v, n, m, T):
+        Boltzmann_constant = 1.380648813E-23
+        k = Boltzmann_constant
         return n*(m/(2*np.pi*k*T))**(3/2)*np.exp(-m*v*v/(2*k*T))*4*np.pi*v**2
+        # return n*np.exp(v)*4*np.pi*v**2
 
 def get_component(particle, b=0, n=3):
     return [particle[i] for i in range(b, b+n)]

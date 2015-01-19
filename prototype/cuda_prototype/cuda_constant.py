@@ -49,7 +49,10 @@ temperature = 4200
 temperatureHelium = 293
 amperage = 150
 
+# duplicate
 kb = 1.38E-23
+Boltzmann_constant = 1.380648813E-23
+
 maxSpeedElectron = np.sqrt(2 * kb * temperature / massElectron)
 deltaSpeedElectron = 0.1*maxSpeedElectron
 maxSpeedHelium = np.sqrt(2 * kb * temperatureHelium / massHelium)
