@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import scipy
 import numpy as np
 from numpy.random import rand
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ from plot import *
 
 # import pdb
 
-""" pseuso time """
+''' pseuso time '''
 def p_time(time):
     return time % (in_memory_time)
 
@@ -20,6 +20,10 @@ def p_next_time(time):
 def p_prev_time(time):
     return (time - 1) % (in_memory_time)
 
+''' Maxwell distribution randomizer '''
+class MWranomizer(scipy.stats.rv_continuous):
+    def _pdf(self, v, n, m, k, T):
+        return n*(m/(2*np.pi*k*T))**(3/2)*np.exp(-m*v*v/(2*k*T))*4*np.pi*v**2
 
 def get_component(particle, b=0, n=3):
     return [particle[i] for i in range(b, b+n)]
