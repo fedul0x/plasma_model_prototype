@@ -50,6 +50,8 @@ temperatureHelium = 293
 amperage = 150
 
 kb = 1.38E-23
+Boltzmann_constant = 1.380648813E-23
+
 maxSpeedElectron = np.sqrt(2 * kb * temperature / massElectron)
 deltaSpeedElectron = 0.1*maxSpeedElectron
 maxSpeedHelium = np.sqrt(2 * kb * temperatureHelium / massHelium)
@@ -62,9 +64,9 @@ xDimensionGrid = 1.0E-3
 yDimensionGrid = 1E-2
 zDimensionGrid = 1E-2
 # число шагов по сетке для крупных частиц
-xNumberStepGrid = 15  #im
-yNumberStepGrid = 15  #km
-zNumberStepGrid = 15  #lm
+xNumberStepGrid = 5  #im
+yNumberStepGrid = 5  #km
+zNumberStepGrid = 5  #lm
 xInitNumberStepGrid = 50  #imm
 yInitNumberStepGrid = 50  #kmm
 zInitNumberStepGrid = 50  #lmm

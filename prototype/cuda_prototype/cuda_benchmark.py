@@ -75,7 +75,7 @@ def potential_establish_method_cuda(file_name, prev_phi, next_phi, ro, epsilon=0
     bd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/gd)
     if (bd != (n[0]-2)*(n[1]-2)*(n[2]-2)/gd):
         bd += 1
-    print('gd={}, bd = {}'.format(gd, bd))
+    # print('gd={}, bd = {}'.format(gd, bd))
 
     subSum = np.zeros((gd, ), dtype=np.float32)
     ssum = 3 * epsilon
@@ -94,6 +94,8 @@ def potential_establish_method_cuda(file_name, prev_phi, next_phi, ro, epsilon=0
         ssum = 0
         for s in subSum:
             ssum += s
+
+        # print(subSum)
         if file_name == 'bm_kernel_1.cu':
             prev_sum, next_sum = 0, 0
             for i in range(1, n[0] - 1):
@@ -126,9 +128,9 @@ def main(file_name):
     ro = np.zeros([n[0], n[1], n[2]], dtype=np.float32)
     start = time.time()
     if (file_name == None):
-        potential_establish_method(prev_phi, next_phi, ro, epsilon=1)
+        potential_establish_method(prev_phi, next_phi, ro, epsilon=0.01)
     else:
-        prev_phi, next_phi = potential_establish_method_cuda(file_name, prev_phi, next_phi, ro, epsilon=1)
+        prev_phi, next_phi = potential_establish_method_cuda(file_name, prev_phi, next_phi, ro, epsilon=0.01)
     end = time.time()
     print('Elapsed time = {}'.format(end-start))
 

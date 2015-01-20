@@ -7,17 +7,19 @@ __device__ __host__ float dif(float x, float y, float z, float step)
     return (x - 2 * y + z) / step / step;
 }
 
+__shared__ float sums[512];
 //TODO change step and matrix_size to vector
 __global__ void potential_establish(float *prev_phi, float *next_phi, float *sum, float *step, int *matrix_size )
 {
-    __shared__ float sums[300];
     const int x_dim = matrix_size[0];
     const int y_dim = matrix_size[1];
     const int z_dim = matrix_size[2];
 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
-    if (index >= (x_dim - 2) * (y_dim - 2) * (z_dim - 2))
+    if (index >= (x_dim - 2) * (y_dim - 2) * (z_dim - 2)) {
+        sums[threadIdx.x] = 0.0;
         return;
+    }
     int i = (int) (index / (z_dim - 2) / (y_dim - 2)) + 1;
     int j = ((int) (index / (z_dim - 2))) % (y_dim - 2) + 1;
     int k = index % (z_dim - 2) + 1;

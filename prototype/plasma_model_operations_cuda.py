@@ -111,14 +111,27 @@ def make_boundary_conditions_for_potentials_2(phi, n, chargeGridElectron, charge
         for i in range(n[0]):
             for j in range(n[1]):
                 for k in range(n[2]):
-                        if i-1>=n2[0] or j-1>=n2[1] or k-1>=n2[2] or i-1<0 or j-1<0 or k-1<0:
-                            prev_phi[i][j][k] = phi
-                            # next_phi[i][j][k] = 0
-                            next_phi[i][j][k] = phi
-                        else:
-                            ro = chargeGridElectron[i-1][j-1][k-1] + chargeGridCarbon[i-1][j-1][k-1] + chargeGridHelium[i-1][j-1][k-1]
-                            prev_phi[i][j][k] = 4*np.pi*ro*deltaT_
-                            next_phi[i][j][k] = 0
+                    if i-1>=n2[0] or j-1>=n2[1] or k-1>=n2[2] or i-1<0 or j-1<0 or k-1<0:
+                        prev_phi[i][j][k] = phi
+                        # next_phi[i][j][k] = 0
+                        next_phi[i][j][k] = phi
+                    else:
+                        ro = chargeGridElectron[i-1][j-1][k-1] + chargeGridCarbon[i-1][j-1][k-1] + chargeGridHelium[i-1][j-1][k-1]
+                        prev_phi[i][j][k] = 4*np.pi*ro*deltaT_
+                        next_phi[i][j][k] = 0
+    if boundary_type == '50_0_BOUNDARY':
+        for i in range(n[0]):
+            for j in range(n[1]):
+                for k in range(n[2]):
+                    ro = chargeGridElectron[i-1][j-1][k-1] + chargeGridCarbon[i-1][j-1][k-1] + chargeGridHelium[i-1][j-1][k-1]
+                    prev_phi[i][j][k] = 4*np.pi*ro*deltaT_
+                    next_phi[i][j][k] = 4*np.pi*ro*deltaT_
+                    if i == n2[0]-1: 
+                        prev_phi[i][j][k] = 0
+                        next_phi[i][j][k] = 0
+                    if i == 0: 
+                        prev_phi[i][j][k] = phi
+                        next_phi[i][j][k] = phi
 
     return (prev_phi, next_phi)
 
