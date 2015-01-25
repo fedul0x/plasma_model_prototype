@@ -5,7 +5,7 @@ __device__ __host__ double dif(float x, float y, float z, float step)
 }
 
 //TODO change step and matrix_size to vector
-__global__ void potential_establish(float *prev_phi, float *next_phi, float *flags, float *step, int *matrix_size )
+__global__ void potential_establish(float *prev_phi, float *next_phi, float* ro, float *flags, float *step, int *matrix_size )
 {
     const int x_dim = matrix_size[0];
     const int y_dim = matrix_size[1];
