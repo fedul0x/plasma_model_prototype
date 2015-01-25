@@ -99,8 +99,8 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
     step = np.array([xStepGrid, yStepGrid, zStepGrid], dtype=np.float32)
     sizes = np.array(n, dtype=np.int32)
     potential_establish = mod.get_function("potential_establish")
-    gd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/300)
-    if (gd != (n[0]-2)*(n[1]-2)*(n[2]-2)/300):
+    gd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/512)
+    if (gd != (n[0]-2)*(n[1]-2)*(n[2]-2)/512):
         gd += 1
     bd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/gd)
     if (bd != (n[0]-2)*(n[1]-2)*(n[2]-2)/gd):

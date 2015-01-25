@@ -36,7 +36,7 @@ radiusCarbon = 31E-12
 radiusHelium = 91E-12
 # deltaT = 1.0E-12
 # deltaT = 1.0E-2
-deltaT = 0.00001
+deltaT = 1.0E-8
 # deltaT = 1
 # Время метода установления
 # deltaT_ = 1.0E-12
@@ -61,8 +61,8 @@ deltaSpeedCarbon = 0.1*maxSpeedCarbon
 
 # Размеры сетки
 xDimensionGrid = 1.0E-3
-yDimensionGrid = 1E-2
-zDimensionGrid = 1E-2
+yDimensionGrid = 1.0E-2
+zDimensionGrid = 1.0E-2
 # число шагов по сетке для крупных частиц
 xNumberStepGrid = 5  #im
 yNumberStepGrid = 5  #km
@@ -82,8 +82,9 @@ zInitStepGrid = zDimensionGrid / zInitNumberStepGrid  #hzz
 # Коэффициенты скорости
 # Kvu2 = 0.005
 # Kvu1 = (3-2*Kvu2**2)
-Kvu2 = 1.0
-Kvu1 = 1.0
+# TODO Исправить коэффициенты
+Kvu2 = 0.47619047619047616
+Kvu1 = 0.04761904761904767
 
 # Коэффициенты скорости для перехода к безразмерным величинам
 Mnue = np.sqrt(2*kb*temperature/massElectron)
