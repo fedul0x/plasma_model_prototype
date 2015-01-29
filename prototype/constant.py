@@ -36,7 +36,8 @@ radiusCarbon = 31E-12
 radiusHelium = 91E-12
 # deltaT = 1.0E-12
 # deltaT = 1.0E-2
-deltaT = 1.0E-8
+deltaT = 1.0E-6
+# deltaT = 1.0E-8
 # deltaT = 1
 # Время метода установления
 # deltaT_ = 1.0E-12
@@ -64,9 +65,9 @@ xDimensionGrid = 1.0E-3
 yDimensionGrid = 1.0E-2
 zDimensionGrid = 1.0E-2
 # число шагов по сетке для крупных частиц
-xNumberStepGrid = 5  #im
-yNumberStepGrid = 5  #km
-zNumberStepGrid = 5  #lm
+xNumberStepGrid = 25  #im
+yNumberStepGrid = 25  #km
+zNumberStepGrid = 25  #lm
 xInitNumberStepGrid = 50  #imm
 yInitNumberStepGrid = 50  #kmm
 zInitNumberStepGrid = 50  #lmm

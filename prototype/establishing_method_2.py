@@ -99,8 +99,8 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
     step = np.array([xStepGrid, yStepGrid, zStepGrid], dtype=np.float32)
     sizes = np.array(n, dtype=np.int32)
     potential_establish = mod.get_function("potential_establish")
-    gd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/300)
-    if (gd != (n[0]-2)*(n[1]-2)*(n[2]-2)/300):
+    gd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/256)
+    if (gd != (n[0]-2)*(n[1]-2)*(n[2]-2)/256):
         gd += 1
     bd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/gd)
     if (bd != (n[0]-2)*(n[1]-2)*(n[2]-2)/gd):
@@ -108,25 +108,23 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
     print('gd={}, bd = {} ===================='.format(gd, bd))
     print('sizes={}'.format(sizes))
 
-    # prev_phi_gpu = drv.mem_alloc((prev_phi.size) * prev_phi.dtype.itemsize)
-    # next_phi_gpu = drv.mem_alloc((next_phi.size) * next_phi.dtype.itemsize)
-    # drv.memcpy_htod(prev_phi_gpu, prev_phi)
-    # drv.memcpy_htod(next_phi_gpu, next_phi)
+    prev_phi_gpu = drv.mem_alloc((prev_phi.size) * prev_phi.dtype.itemsize)
+    next_phi_gpu = drv.mem_alloc((next_phi.size) * next_phi.dtype.itemsize)
+    drv.memcpy_htod(prev_phi_gpu, prev_phi)
+    drv.memcpy_htod(next_phi_gpu, next_phi)
 
     subSum = np.zeros((gd, ), dtype=np.float32)
     ssum = 4 * epsilon
     while ssum > epsilon:
         potential_establish(
-            drv.InOut(prev_phi), drv.InOut(next_phi), 
-            # next_phi_gpu, prev_phi_gpu, 
+            prev_phi_gpu, next_phi_gpu, 
             drv.In(ro), drv.InOut(subSum), 
             drv.In(step), drv.In(sizes), 
             block=(bd,1, 1), grid=(gd,1))
         for s in range(subSum.shape[0]):
             subSum[s] = 0.0
         potential_establish(
-            drv.InOut(next_phi), drv.InOut(prev_phi), 
-            # next_phi_gpu, prev_phi_gpu, 
+            next_phi_gpu, prev_phi_gpu, 
             drv.In(ro), drv.InOut(subSum), 
             drv.In(step), drv.In(sizes), 
             block=(bd,1, 1), grid=(gd,1))
@@ -140,9 +138,9 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
     #     cs=plt.imshow(flags[i], interpolation='nearest')
     #     plt.colorbar(cs)
     #     plt.show()
-    # drv.memcpy_dtoh(prev_phi, prev_phi_gpu)
-    # drv.memcpy_dtoh(next_phi, next_phi_gpu)
-    # prev_phi_gpu.free()
-    # next_phi_gpu.free()
+    drv.memcpy_dtoh(prev_phi, prev_phi_gpu)
+    drv.memcpy_dtoh(next_phi, next_phi_gpu)
+    prev_phi_gpu.free()
+    next_phi_gpu.free()
 
     return (prev_phi, next_phi)

@@ -9,7 +9,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 from constant import *
 from plot import *
-from establishing_method import *
+from establishing_method_2 import *
 # import pdb
 
 ''' pseuso time '''
@@ -149,8 +149,8 @@ def main(prefix):
                 xBig, yBig, zBig, speed = spreadParticle((x, y, z), (xStepGrid, yStepGrid, zStepGrid), (maxSpeedElectron, deltaSpeedElectron), numbersElectron)
                 speed = speed/Mnue
                 # горячий страт электронов
-                speed = maxwell_randomizer.rvs(n=1, m=massElectron, T=temperature, size=1)/Mnue
-                # speed = 0.0
+                # speed = maxwell_randomizer.rvs(n=1, m=massElectron, T=temperature, size=1)/Mnue
+                speed = 0.0
                 radiusBigElectron = (hi * radiusElectron ** 3 * numbersElectron) ** (1.0 / 3.0)
                 chargeBigElectron = chargeElectron * numbersElectron
                 for v, l in zip([xBig, yBig, zBig, radiusBigElectron, chargeBigElectron, speed/np.sqrt(3)*Kvu1, speed/np.sqrt(3)*Kvu2, speed/np.sqrt(3)*Kvu2], range(positionElectron.shape[2])):
@@ -161,8 +161,8 @@ def main(prefix):
                     xBig, yBig, zBig, speed = spreadParticle((0, y, z), (xStepGrid, yStepGrid, zStepGrid), (maxSpeedCarbon, deltaSpeedCarbon), numbersCarbon)
                     speed = speed/Mnuc
                     # горячий страт
-                    speed = maxwell_randomizer.rvs(n=1, m=massCarbon, T=temperature, size=1)/Mnuc
-                    # speed = 0.0
+                    # speed = maxwell_randomizer.rvs(n=1, m=massCarbon, T=temperature, size=1)/Mnuc
+                    speed = 0.0
                     # print(speed/np.sqrt(3)*Kvu1, speed/np.sqrt(3)*Kvu2, speed/np.sqrt(3)*Kvu2)
                     radiusBigCarbon = (hi * radiusCarbon ** 3 * numbersCarbon) ** (1.0 / 3.0) * 10.0**6
                     chargeBigCarbon = chargeCarbon * numbersCarbon
@@ -174,8 +174,8 @@ def main(prefix):
                 xBig, yBig, zBig, speed = spreadParticle((x, y, z), (xStepGrid, yStepGrid, zStepGrid), (maxSpeedHelium, deltaSpeedHelium), numbersHelium)
                 speed = speed/Mnuh
                 # горячий страт
-                speed = maxwell_randomizer.rvs(n=1, m=massHelium, T=temperatureHelium, size=1)/Mnuh
-                # speed = 0.0
+                # speed = maxwell_randomizer.rvs(n=1, m=massHelium, T=temperatureHelium, size=1)/Mnuh
+                speed = 0.0
                 radiusBigHelium = (hi * radiusHelium ** 3 * numbersHelium) ** (1.0 / 3.0)
                 chargeBigHelium = chargeHelium * numbersHelium
                 for v, l in zip([xBig, yBig, zBig, radiusBigHelium, chargeBigHelium, speed/np.sqrt(3)*Kvu1, speed/np.sqrt(3)*Kvu2, speed/np.sqrt(3)*Kvu2], range(positionHelium.shape[2])):
@@ -203,8 +203,10 @@ def main(prefix):
         chargeGridHelium = np.zeros([xRange.shape[0], yRange.shape[0], zRange.shape[0]])
         positions = [positionElectron, positionCarbon, positionHelium]
         grids = [chargeGridElectron, chargeGridCarbon, chargeGridHelium]
-        for grid, position in zip(grids, positions):
+        names = ['positionElectron', 'positionCarbon', 'positionHelium']
+        for grid, position, name in zip(grids, positions, names):
             for num in range(position.shape[1]):
+                # print(name)
                 xBig, yBig, zBig, _, charge, _, _, _ = position[curr_time][num]
                 # if xBig/xStepGrid == np.NaN or yBig/yStepGrid == np.NaN or zBig/zStepGrid == np.NaN:
                 #     pdb.set_trace()
@@ -232,9 +234,9 @@ def main(prefix):
                     ro[i][j][k] = chargeGridElectron[i-1][j-1][k-1] + chargeGridCarbon[i-1][j-1][k-1] + chargeGridHelium[i-1][j-1][k-1]
         # print(prev_phi)
         # print(next_phi)
-        print('THIS IS START OF potential_establish_method_cuda')
+        # print('THIS IS START OF potential_establish_method_cuda')
         prev_phi, next_phi = potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01)
-        print('THIS IS END OF potential_establish_method_cuda')
+        # print('THIS IS END OF potential_establish_method_cuda')
         # return
 
         # Расчет напряженности
@@ -323,13 +325,12 @@ def main(prefix):
         #             print("+++++++++++++++HELIUM+END+++++++++++++++++++++")
         #             print(crashesHelium)
         #             print("+++++++++++++++HELIUM+END+++++++++++++++++++++")
-        print('THIS IS START OF RKF')
+        # print('THIS IS START OF RKF')
         from scipy.integrate import odeint
         def f(y, t):
-            # delta = 1.0
-            # Z = 1.0
-            # epsilonC = 1.0
-            r, v, E, delta, Z, epsilonC = y[0], y[1], y[2], y[3], y[4], y[5]
+            delta, Z, epsilonC = 1.0, 1.0, 1.0
+            # r, v, E, delta, Z, epsilonC = y[0], y[1], y[2], y[3], y[4], y[5]
+            r, v, E = y[0], y[1], y[2]
             f = [np.sqrt(delta)*v, np.sqrt(delta)*Z/2/epsilonC*E]
             return f
 
@@ -347,10 +348,18 @@ def main(prefix):
                 v = speeds[dim]
                 r = positionCarbon[curr_time][num][dim]/Ml
                 E = tensionCorpusculActingCarbon[num][dim]/Mee
-                delta, Z, epsilonC = 1.0, 1.0, 1.0
+                # delta, Z, epsilonC = 1.0, 1.0, 1.0
 
-                y0 = [r, v, E, delta, Z, epsilonC]
+                # y0 = [r, v, E, delta, Z, epsilonC]
+                y0 = [r, v, E]
+                # while True:
                 res = odeint(f, y0, t)
+                #     print('VALUE ', res[-1][0], np.isnan(res[-1][0]))
+                #     if not np.isnan(res[-1][0]):
+                #         break
+                #     print('RESOLVE ', res[-1][0], np.isnan(res[-1][0]))
+                # if num == 0:
+                #     print(res)
                 positionCarbon[p_next_time(time)][num][dim] = res[-1][0]*Ml
                 positionCarbon[p_next_time(time)][num][5+dim] = res[-1][1]
         for num in range(positionElectron.shape[1]):
@@ -359,7 +368,7 @@ def main(prefix):
         for num in range(positionHelium.shape[1]):
             for l in range(positionHelium.shape[2]):
                 positionHelium[p_next_time(time)][num][l] = positionHelium[curr_time][num][l]
-        print('THIS IS END OF RKF')
+        # print('THIS IS END OF RKF')
 
         time += 1
         print('time = {} '.format(time))
@@ -376,73 +385,74 @@ def main(prefix):
         # plt.savefig("./picts/carbon_3d_speed_{0:04d}.png".format(time))
         plt.savefig("{}/carbon_two_coord_{:04d}.png".format(directory, time))
         plt.clf()
+        plt.close()
         # fig = None
 
-        directory = make_dir(prefix, 'inten')    
-        fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
-        for i, ax in zip(inten, [ax1, ax2, ax3]):
-            ax.plot([k for k,_,_ in i], color='red')
-        plt.savefig("{}/int_time={:04d}".format(directory, time))
-        plt.clf()
+        # directory = make_dir(prefix, 'inten')    
+        # fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
+        # for i, ax in zip(inten, [ax1, ax2, ax3]):
+        #     ax.plot([k for k,_,_ in i], color='red')
+        # plt.savefig("{}/int_time={:04d}".format(directory, time))
+        # plt.clf()
 
 
-        directory = make_dir(prefix, 'phi')    
-        n = next_phi.shape;
-        plot_phi = np.zeros((n[0], n[1]))
-        for k in range(n[2]):
-            for i in range(n[0]):
-                for j in range(n[1]):
-                    plot_phi[i][j] = next_phi[i][j][k]
+        # directory = make_dir(prefix, 'phi')    
+        # n = next_phi.shape;
+        # plot_phi = np.zeros((n[0], n[1]))
+        # for k in range(n[2]):
+        #     for i in range(n[0]):
+        #         for j in range(n[1]):
+        #             plot_phi[i][j] = next_phi[i][j][k]
 
-            plt.contourf(plot_phi.T, cmap=plt.cm.flag)
-            plt.colorbar()
-            plt.savefig("{}/phi_time={:04d}_z={:02d}".format(directory, time, k))
-            plt.clf()
+        #     plt.contourf(plot_phi.T, cmap=plt.cm.flag)
+        #     plt.colorbar()
+        #     plt.savefig("{}/phi_time={:04d}_z={:02d}".format(directory, time, k))
+        #     plt.clf()
 
-        directory = make_dir(prefix, 'intensity')    
-        n = intensity.shape;
-        plot_intensity = np.zeros((n[0], n[1]))
-        for k in range(n[2]):
-            for i in range(n[0]):
-                for j in range(n[1]):
-                    # plot_intensity[i][j] = np.sqrt(np.sum([intensity[i][j][k][l]**2 for l in range(3)]))
-                    plot_intensity[i][j] = intensity[i][j][k][0]
+        # directory = make_dir(prefix, 'intensity')    
+        # n = intensity.shape;
+        # plot_intensity = np.zeros((n[0], n[1]))
+        # for k in range(n[2]):
+        #     for i in range(n[0]):
+        #         for j in range(n[1]):
+        #             # plot_intensity[i][j] = np.sqrt(np.sum([intensity[i][j][k][l]**2 for l in range(3)]))
+        #             plot_intensity[i][j] = intensity[i][j][k][0]
 
-            plt.contourf(plot_intensity.T, cmap=plt.cm.flag)
-            plt.colorbar()
-            plt.savefig("{}/intensity_time={:04d}_z={:02d}".format(directory, time, k))
-            plt.clf()
+        #     plt.contourf(plot_intensity.T, cmap=plt.cm.flag)
+        #     plt.colorbar()
+        #     plt.savefig("{}/intensity_time={:04d}_z={:02d}".format(directory, time, k))
+        #     plt.clf()
 
-        directory = make_dir(prefix, 'tension')    
-        tension = tensionCorpusculActingCarbon
-        n = tension.shape;
-        plot_tension = np.zeros(n[0])
-        plot_tension_x = np.zeros(n[0])
-        plot_tension_y = np.zeros(n[0])
-        plot_tension_z = np.zeros(n[0])
-        for i in range(n[0]):
-            plot_tension[i] = np.sqrt(np.sum([tension[i][l]**2 for l in range(3)]))
-            plot_tension_x[i] = tension[i][0]
-            plot_tension_y[i] = tension[i][1]
-            plot_tension_z[i] = tension[i][2]
+        # directory = make_dir(prefix, 'tension')    
+        # tension = tensionCorpusculActingCarbon
+        # n = tension.shape;
+        # plot_tension = np.zeros(n[0])
+        # plot_tension_x = np.zeros(n[0])
+        # plot_tension_y = np.zeros(n[0])
+        # plot_tension_z = np.zeros(n[0])
+        # for i in range(n[0]):
+        #     plot_tension[i] = np.sqrt(np.sum([tension[i][l]**2 for l in range(3)]))
+        #     plot_tension_x[i] = tension[i][0]
+        #     plot_tension_y[i] = tension[i][1]
+        #     plot_tension_z[i] = tension[i][2]
 
-        fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
-        ax1.plot(plot_tension_x)
-        ax2.plot(plot_tension_y)
-        ax3.plot(plot_tension_z)
-        plt.savefig("{}/tension_by_x_y_z_time={:04d}".format(directory, time))
-        plt.clf()
+        # fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
+        # ax1.plot(plot_tension_x)
+        # ax2.plot(plot_tension_y)
+        # ax3.plot(plot_tension_z)
+        # plt.savefig("{}/tension_by_x_y_z_time={:04d}".format(directory, time))
+        # plt.clf()
 
-        plt.plot(plot_tension)
-        plt.savefig("{}/tension_by_sum(x,y,z)_time={:04d}".format(directory, time))
-        plt.clf()
+        # plt.plot(plot_tension)
+        # plt.savefig("{}/tension_by_sum(x,y,z)_time={:04d}".format(directory, time))
+        # plt.clf()
 
 
         
-        curr_time = p_prev_time(time)
-        for p, l in zip(listen_particles, range(len(listen_particles))):
-            plot_data[l] += [positionCarbon[curr_time][p].copy()]
-        # print(plot_data)
+        # curr_time = p_prev_time(time)
+        # for p, l in zip(listen_particles, range(len(listen_particles))):
+        #     plot_data[l] += [positionCarbon[curr_time][p].copy()]
+        # # print(plot_data)
     # except IndexError:
     #     print('IndexError')
     #     pass
