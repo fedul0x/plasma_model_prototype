@@ -4,6 +4,7 @@ import numpy as np
 import pycuda.driver as drv
 import pycuda.autoinit
 from pycuda.compiler import SourceModule
+import matplotlib.pyplot as plt
 
 from constant import *
 
@@ -64,6 +65,37 @@ def make_boundary_conditions_for_potentials_2(phi, n, chargeGridElectron, charge
                     if i == 0: 
                         prev_phi[i][j][k] = phi
                         next_phi[i][j][k] = phi
+    if boundary_type == '50_0_INTERPOLATION_BOUNDARY':
+        intr = np.linspace(0, phi, n[0])
+        ro = chargeGridElectron[0][0][0] + chargeGridCarbon[0][0][0] + chargeGridHelium[0][0][0]
+        for i in range(n[0]):
+            for j in range(n[1]):
+                for k in range(n[2]):
+                    if (i * j * k == 0) or (i == n[0] - 1) or (j == n[1] - 1) or (k == n[2] - 1):
+                        prev_phi[i][j][k] = intr[-i-1]
+                        next_phi[i][j][k] = intr[-i-1]
+                        continue
+                    ro = chargeGridElectron[i-1][j-1][k-1] + chargeGridCarbon[i-1][j-1][k-1] + chargeGridHelium[i-1][j-1][k-1]
+                    prev_phi[i][j][k] = 4*np.pi*ro*deltaT_
+                    next_phi[i][j][k] = 4*np.pi*ro*deltaT_
+                    if i == n[0]-1: 
+                        prev_phi[i][j][k] = 0
+                        next_phi[i][j][k] = 0
+                    if i == 0: 
+                        prev_phi[i][j][k] = phi
+                        next_phi[i][j][k] = phi
+        # n = next_phi.shape
+        # plot_phi = np.zeros((n[0], n[1]))
+        # for k in range(n[2]):
+        #     for i in range(n[0]):
+        #         for j in range(n[1]):
+        #             plot_phi[i][j] = next_phi[i][j][k]
+
+        #     plt.contourf(plot_phi.T, cmap=plt.cm.flag)
+        #     plt.colorbar()
+        #     plt.show()
+        #     plt.clf()
+    
 
     # print('THISSSS')
     return (prev_phi, next_phi)
@@ -131,6 +163,7 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
         ssum = 0
         for s in subSum:
             ssum += s
+
         # print('{}>{}'.format(ssum, epsilon))
 
     # for i in range(flags.shape[0]):
@@ -140,6 +173,18 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
     #     plt.show()
     drv.memcpy_dtoh(prev_phi, prev_phi_gpu)
     drv.memcpy_dtoh(next_phi, next_phi_gpu)
+    # n = next_phi.shape
+    # plot_phi = np.zeros((n[0], n[1]))
+    # for k in range(n[2]):
+    #     for i in range(n[0]):
+    #         for j in range(n[1]):
+    #             plot_phi[i][j] = next_phi[i][j][k]
+
+    #     plt.contourf(plot_phi.T, cmap=plt.cm.flag)
+    #     plt.title('{}'.format(ssum))
+    #     plt.colorbar()
+    #     plt.show()
+    #     plt.clf()
     prev_phi_gpu.free()
     next_phi_gpu.free()
 

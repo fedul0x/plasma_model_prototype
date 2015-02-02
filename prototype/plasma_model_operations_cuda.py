@@ -221,7 +221,7 @@ def main(prefix):
         # Граничные условия для потенциала
         n = (xRange.shape[0]+2, yRange.shape[0]+2, zRange.shape[0]+2)
         # prev_phi, next_phi = make_boundary_conditions_for_potentials(50, n)
-        prev_phi, next_phi = make_boundary_conditions_for_potentials_2(50, n, chargeGridElectron, chargeGridCarbon, chargeGridHelium, boundary_type='50_0_BOUNDARY')
+        prev_phi, next_phi = make_boundary_conditions_for_potentials_2(50, n, chargeGridElectron, chargeGridCarbon, chargeGridHelium, boundary_type='50_0_INTERPOLATION_BOUNDARY')
         # prev_phi, next_phi = make_boundary_conditions_for_potentials(50, n, boundary_type='50_0_INTERPOLATION_BOUNDARY')
         # Метод установления
         # n = (chargeGridElectron.shape[0]+2, chargeGridElectron.shape[1]+2, chargeGridElectron.shape[2]+2)
@@ -333,7 +333,7 @@ def main(prefix):
             r, v, E = y[0], y[1], y[2]
             f = [np.sqrt(delta)*v, np.sqrt(delta)*Z/2/epsilonC*E]
             return f
-
+        # TODO change 2 delatT
         t = np.linspace(0, 2*deltaT, 20)
         curr_time = p_time(time)
         for num in range(positionCarbon.shape[1]):
@@ -354,12 +354,12 @@ def main(prefix):
                 y0 = [r, v, E]
                 # while True:
                 res = odeint(f, y0, t)
-                #     print('VALUE ', res[-1][0], np.isnan(res[-1][0]))
-                #     if not np.isnan(res[-1][0]):
-                #         break
-                #     print('RESOLVE ', res[-1][0], np.isnan(res[-1][0]))
-                # if num == 0:
-                #     print(res)
+                    # print('VALUE ', res[-1][0], np.isnan(res[-1][0]))
+                    # if not np.isnan(res[-1][0]):
+                    #     break
+                    # print('RESOLVE ', res[-1][0], np.isnan(res[-1][0]))
+                if num == 0:
+                    print(res)
                 positionCarbon[p_next_time(time)][num][dim] = res[-1][0]*Ml
                 positionCarbon[p_next_time(time)][num][5+dim] = res[-1][1]
         for num in range(positionElectron.shape[1]):
@@ -449,10 +449,10 @@ def main(prefix):
 
 
         
-        # curr_time = p_prev_time(time)
-        # for p, l in zip(listen_particles, range(len(listen_particles))):
-        #     plot_data[l] += [positionCarbon[curr_time][p].copy()]
-        # # print(plot_data)
+        curr_time = p_prev_time(time)
+        for p, l in zip(listen_particles, range(len(listen_particles))):
+            plot_data[l] += [positionCarbon[curr_time][p].copy()]
+        # print(plot_data)
     # except IndexError:
     #     print('IndexError')
     #     pass
