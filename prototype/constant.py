@@ -37,8 +37,8 @@ radiusHelium = 91E-12
 # deltaT = 1.0E-12
 # deltaT = 1.0E-2
 # deltaT = 1.0E-8
-deltaT = 1.0E-6
-# deltaT = 1.0E-4
+# deltaT = 1.0E-6
+deltaT = 1.0E-8
 # deltaT = 1
 # Время метода установления
 # deltaT_ = 1.0E-12
