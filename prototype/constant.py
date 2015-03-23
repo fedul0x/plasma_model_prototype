@@ -81,6 +81,7 @@ xInitStepGrid = xDimensionGrid / xInitNumberStepGrid  #hxx
 yInitStepGrid = yDimensionGrid / yInitNumberStepGrid  #hyy
 zInitStepGrid = zDimensionGrid / zInitNumberStepGrid  #hzz
 
+phi_limit_value = 50
 # Коэффициенты скорости
 # Kvu2 = 0.005
 # Kvu1 = (3-2*Kvu2**2)

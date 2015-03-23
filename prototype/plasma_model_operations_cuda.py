@@ -161,8 +161,8 @@ def main(prefix):
                     xBig, yBig, zBig, speed = spreadParticle((0, y, z), (xStepGrid, yStepGrid, zStepGrid), (maxSpeedCarbon, deltaSpeedCarbon), numbersCarbon)
                     speed = speed/Mnuc
                     # горячий страт
-                    speed = maxwell_randomizer.rvs(n=1, m=massCarbon, T=temperature, size=1)[0]/Mnuc/100
-                    mu, sigma = 0, np.pi/10 # mean and standard deviation
+                    speed = maxwell_randomizer.rvs(n=1, m=massCarbon, T=temperature, size=1)[0]/Mnuc
+                    mu, sigma = 0, np.pi/30 # mean and standard deviation
                     s = np.random.normal(mu, sigma, 2)
                     s[1] = s[1] + np.pi/2
                     # print(s)
@@ -402,7 +402,7 @@ def main(prefix):
             plt.close()
             # fig = None
 
-            plt.plot([Mnuc*np.sqrt(positionCarbon[curr_time][i][5]**2 + positionCarbon[curr_time][i][6]**2 + positionCarbon[curr_time][i][7]**2)  for i in range(positionCarbon.shape[1])])
+            plt.plot([Mnuc*np.sqrt(positionCarbon[p_prev_time(time)][i][5]**2 + positionCarbon[p_prev_time(time)][i][6]**2 + positionCarbon[p_prev_time(time)][i][7]**2)  for i in range(positionCarbon.shape[1])])
             plt.title('carbon speed from particle number time = {} '.format(time))
             plt.savefig("{}/carbon_speed_by_pn_time={:04d}".format(directory, time))
             plt.clf()
@@ -417,34 +417,34 @@ def main(prefix):
             plt.close()
 
 
-            directory = make_dir(prefix, 'phi')    
-            n = next_phi.shape;
-            plot_phi = np.zeros((n[0], n[1]))
-            for k in range(n[2]):
-                for i in range(n[0]):
-                    for j in range(n[1]):
-                        plot_phi[i][j] = next_phi[i][j][k]
+            # directory = make_dir(prefix, 'phi')    
+            # n = next_phi.shape;
+            # plot_phi = np.zeros((n[0], n[1]))
+            # for k in range(n[2]):
+            #     for i in range(n[0]):
+            #         for j in range(n[1]):
+            #             plot_phi[i][j] = next_phi[i][j][k]
 
-                plt.contourf(plot_phi.T, cmap=plt.cm.flag)
-                plt.colorbar()
-                plt.savefig("{}/phi_time={:04d}_z={:02d}".format(directory, time, k))
-                plt.clf()
-            plt.close()
+            #     plt.contourf(plot_phi.T, cmap=plt.cm.flag)
+            #     plt.colorbar()
+            #     plt.savefig("{}/phi_time={:04d}_z={:02d}".format(directory, time, k))
+            #     plt.clf()
+            # plt.close()
 
-            directory = make_dir(prefix, 'intensity')    
-            n = intensity.shape;
-            plot_intensity = np.zeros((n[0], n[1]))
-            for k in range(n[2]):
-                for i in range(n[0]):
-                    for j in range(n[1]):
-                        # plot_intensity[i][j] = np.sqrt(np.sum([intensity[i][j][k][l]**2 for l in range(3)]))
-                        plot_intensity[i][j] = intensity[i][j][k][0]
+            # directory = make_dir(prefix, 'intensity')    
+            # n = intensity.shape;
+            # plot_intensity = np.zeros((n[0], n[1]))
+            # for k in range(n[2]):
+            #     for i in range(n[0]):
+            #         for j in range(n[1]):
+            #             # plot_intensity[i][j] = np.sqrt(np.sum([intensity[i][j][k][l]**2 for l in range(3)]))
+            #             plot_intensity[i][j] = intensity[i][j][k][0]
 
-                plt.contourf(plot_intensity.T, cmap=plt.cm.flag)
-                plt.colorbar()
-                plt.savefig("{}/intensity_time={:04d}_z={:02d}".format(directory, time, k))
-                plt.clf()
-            plt.close()
+            #     plt.contourf(plot_intensity.T, cmap=plt.cm.flag)
+            #     plt.colorbar()
+            #     plt.savefig("{}/intensity_time={:04d}_z={:02d}".format(directory, time, k))
+            #     plt.clf()
+            # plt.close()
 
             directory = make_dir(prefix, 'tension')    
             tension = tensionCorpusculActingCarbon
@@ -485,9 +485,13 @@ def main(prefix):
 
     directory = make_dir(prefix, 'graphs')
 
-    # speed distribution
+    # speed distributionsudo numbersElectron            
     end_speed_distribution_data = [Mnuc*np.sqrt(positionCarbon[curr_time][i][5]**2 + positionCarbon[curr_time][i][6]**2 + positionCarbon[curr_time][i][7]**2)  for i in range(positionCarbon.shape[1])]
-    fig, (ax1, ax2) = plt.subplots(2, sharex=True)
+
+    print (begin_speed_distribution_data)
+    print (end_speed_distribution_data)
+
+    fig, (ax1, ax2) = plt.subplots(2)
     ax1.hist(begin_speed_distribution_data, normed=True, histtype='stepfilled')
     ax2.hist(end_speed_distribution_data, normed=True, histtype='stepfilled')
     ax1.set_title("distribution at begin")
