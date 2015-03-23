@@ -5,26 +5,30 @@ import scipy.stats
 import numpy as np
 from numpy.random import rand
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 from constant import *
 from plot import *
 from establishing_method_2 import *
 # import pdb
 
-''' pseuso time '''
+
 def p_time(time):
+    ''' pseuso time '''
     return time % (in_memory_time)
+
 
 def p_next_time(time):
     return (time + 1) % (in_memory_time)
 
+
 def p_prev_time(time):
     return (time - 1) % (in_memory_time)
 
-''' Maxwell distribution randomizer '''
+
 class MWranomizer(scipy.stats.rv_continuous):
+
     def __init__(self):
+        ''' Maxwell distribution randomizer '''
         scipy.stats.rv_continuous.__init__(self)
         self.a = 0
 
@@ -34,14 +38,17 @@ class MWranomizer(scipy.stats.rv_continuous):
         return n*(m/(2*np.pi*k*T))**(3/2)*np.exp(-m*v*v/(2*k*T))*4*np.pi*v**2
         # return n*np.exp(v)*4*np.pi*v**2
 
+
 def get_component(particle, b=0, n=3):
     return [particle[i] for i in range(b, b+n)]
+
 
 def getSpeedProjection(particle):
     # speed = particle[5]
     # devider = np.sqrt(3)
     # return (speed*Kvu￼1/devider, speed*Kvu2/devider, speed*Kvu2/devider)
     return (particle[5], particle[6], particle[7])
+
 
 def spreadParticle(center, steps, speedCenter, number):
     x, y, z, = center
@@ -58,6 +65,7 @@ def spreadParticle(center, steps, speedCenter, number):
         speed += (maxSpeed + deltaSpeed) - 2*rand()*deltaSpeed
     # return xBig/number/Ml, yBig/number/Ml, zBig/number/Ml, speed/number
     return xBig/number, yBig/number, zBig/number, speed/number
+
 
 def spreadCharge(center, steps, bigCenter, charge):
     x, y, z, = center
@@ -79,6 +87,7 @@ def spreadCharge(center, steps, bigCenter, charge):
     res += [(i + 1, j + 1, k + 1, charge * neighborX * neighborY * neighborZ / v)]
 
     return res
+
 
 def spreadTension(center, steps, bigCenter, intensity):
     x, y, z, = center
@@ -116,10 +125,9 @@ def spreadTension(center, steps, bigCenter, intensity):
         intensity[i+1][j+1][k+1][2] * (neighborX)*(neighborY)*neighborZ / (xStepGrid*yStepGrid*zStepGrid)
     return (xTension, yTension, zTension)
 
+
 def dif(x, y, z, step):
     return (x - 2 * y + z) / step ** 2
-
-
 
 
 def main(prefix):
@@ -208,7 +216,7 @@ def main(prefix):
     # Для итоговых графиков
     listen_particles = [0, int(positionCarbon.shape[1]/2), positionCarbon.shape[1]-1]
     plot_data = [[] for _ in listen_particles]
-    try:  
+    try:
         while (time < modeling_time):
             curr_time = p_time(time)
             # Заряд в узлах
@@ -235,7 +243,7 @@ def main(prefix):
             # Граничные условия для потенциала
             n = (xRange.shape[0]+2, yRange.shape[0]+2, zRange.shape[0]+2)
             # prev_phi, next_phi = make_boundary_conditions_for_potentials(50, n)
-            prev_phi, next_phi = make_boundary_conditions_for_potentials_2(50, n, chargeGridElectron, chargeGridCarbon, chargeGridHelium, boundary_type='50_0_INTERPOLATION_BOUNDARY')
+            prev_phi, next_phi = make_boundary_conditions_for_potentials_2(phi_limit_value, n, chargeGridElectron, chargeGridCarbon, chargeGridHelium, boundary_type='50_0_INTERPOLATION_BOUNDARY')
             # prev_phi, next_phi = make_boundary_conditions_for_potentials(50, n, boundary_type='50_0_INTERPOLATION_BOUNDARY')
             # Метод установления
             # n = (chargeGridElectron.shape[0]+2, chargeGridElectron.shape[1]+2, chargeGridElectron.shape[2]+2)
