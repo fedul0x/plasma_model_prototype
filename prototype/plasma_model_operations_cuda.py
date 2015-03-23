@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from constant import *
 from plot import *
-from establishing_method_2 import *
+from establishing_method import *
 # import pdb
 
 
@@ -425,19 +425,19 @@ def main(prefix):
             plt.close()
 
 
-            # directory = make_dir(prefix, 'phi')    
-            # n = next_phi.shape;
-            # plot_phi = np.zeros((n[0], n[1]))
-            # for k in range(n[2]):
-            #     for i in range(n[0]):
-            #         for j in range(n[1]):
-            #             plot_phi[i][j] = next_phi[i][j][k]
+            directory = make_dir(prefix, 'phi')    
+            n = next_phi.shape;
+            plot_phi = np.zeros((n[0], n[1]))
+            for k in range(n[2]):
+                for i in range(n[0]):
+                    for j in range(n[1]):
+                        plot_phi[i][j] = next_phi[i][j][k]
 
-            #     plt.contourf(plot_phi.T, cmap=plt.cm.flag)
-            #     plt.colorbar()
-            #     plt.savefig("{}/phi_time={:04d}_z={:02d}".format(directory, time, k))
-            #     plt.clf()
-            # plt.close()
+                plt.contourf(plot_phi.T, cmap=plt.cm.flag)
+                plt.colorbar()
+                plt.savefig("{}/phi_time={:04d}_z={:02d}".format(directory, time, k))
+                plt.clf()
+            plt.close()
 
             # directory = make_dir(prefix, 'intensity')    
             # n = intensity.shape;
