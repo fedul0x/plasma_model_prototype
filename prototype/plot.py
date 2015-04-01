@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from mpl_toolkits.mplot3d import proj3d
+import matplotlib.pyplot as plt
 
-from plasma_model_operations_cuda import get_component, p_prev_time 
+from plasma_model_operations_cuda import get_component, p_prev_time, make_dir
 from constant import *
 
 
@@ -63,21 +64,21 @@ def make_tracks_plot_file(prefix, position, time):
     ax = fig.add_subplot(211, projection='3d')
     ax2 = fig.add_subplot(212)
     plt.title('time = {} '.format(time))
-    ax = make_3d_plot_with_speed(ax, positionCarbon, p_prev_time(time), n, plot_type='COORD')
-    ax2 = make_2d_plot_with_tracks(ax2, positionCarbon, p_prev_time(time), n)
+    ax = make_3d_plot_with_speed(ax, position, p_prev_time(time), n, plot_type='COORD')
+    ax2 = make_2d_plot_with_tracks(ax2, position, p_prev_time(time), n)
     # plt.show()
     plt.savefig("{}/carbon_two_coord_{:04d}.png".format(directory, time))
     plt.clf()
     plt.close()
 
-    plt.plot([Mnuc*np.sqrt(positionCarbon[p_prev_time(time)][i][5]**2 + positionCarbon[p_prev_time(time)][i][6]**2 + positionCarbon[p_prev_time(time)][i][7]**2)  for i in range(positionCarbon.shape[1])])
+    plt.plot([Mnuc*np.sqrt(position[p_prev_time(time)][i][5]**2 + position[p_prev_time(time)][i][6]**2 + position[p_prev_time(time)][i][7]**2)  for i in range(position.shape[1])])
     plt.title('carbon speed from particle number time = {} '.format(time))
     plt.savefig("{}/carbon_speed_by_pn_time={:04d}".format(directory, time))
     plt.clf()
     plt.close()
 
 
-def make_intent_plot_file(prefix, intent, time):
+def make_inten_plot_file(prefix, inten, time):
     directory = make_dir(prefix, 'inten')
     fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
     for i, ax in zip(inten, [ax1, ax2, ax3]):
@@ -121,7 +122,6 @@ def make_intensity_plot_file(prefix, intensity, time):
 
 def make_tension_plot_file(prefix, tension, time):
     directory = make_dir(prefix, 'tension')
-    tension = carbon_tension
     n = tension.shape
     plot_tension = np.zeros(n[0])
     plot_tension_x = np.zeros(n[0])

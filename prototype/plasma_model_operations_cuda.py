@@ -70,7 +70,6 @@ def spread_position(center, number):
 
 def spread_speed(randomizer, dimensionless=1):
     speed = randomizer.rvs(size=1)[0]/dimensionless
-    # x_speed, y_speed, z_speed = speed, 0, 0
     mu, sigma = 0, np.pi/30
     angle = np.random.normal(mu, sigma, 2)
     angle[1] = angle[1] + np.pi/2
@@ -147,6 +146,7 @@ def main(prefix):
     carbon_num = 0  # номер углерода
     time = 0  # позиция по временной шкале с учетом цикличности заполнения
     # TODO оптимизировать получения случвела Максвелла
+    print('Particle distribution')
     electron_randomizer = MWranomizer(n=1, m=ELECTRONS_MASS, T=TEMPERATURE)
     carbon_randomizer = MWranomizer(n=1, m=CARBONS_MASS, T=TEMPERATURE)
     helium_randomizer = MWranomizer(n=1, m=HELIUMS_MASS, T=HELIUMS_TEMPERATURE)
@@ -174,7 +174,7 @@ def main(prefix):
             carbon_num += 1
             for x, i in zip(x_range[:-1], range(x_range.shape[0] - 1)):
                 cell = (x, y, z)
-                print(cell)
+                # print(cell)
                 # Распределение электронов
                 x_big, y_big, z_big = \
                     spread_position(cell, ELECTRONS_NUMBER)
@@ -192,8 +192,8 @@ def main(prefix):
                 num += 1
 
     # Speed distribution 
-    # begin_speed_distribution_data = [Mnuc*np.sqrt(positionCarbon[time][i][5]**2 + positionCarbon[time][i][6]**2 + positionCarbon[time][i][7]**2)  for i in range(positionCarbon.shape[1])]
-    begin_speed_distribution_data = [positionCarbon[time][i][5]  for i in range(positionCarbon.shape[1])]
+    begin_speed_distribution_data = [Mnuc*np.sqrt(positionCarbon[time][i][5]**2 + positionCarbon[time][i][6]**2 + positionCarbon[time][i][7]**2)  for i in range(positionCarbon.shape[1])]
+    # begin_speed_distribution_data = [positionCarbon[time][i][5]  for i in range(positionCarbon.shape[1])]
     end_speed_distribution_data = []
     
     # MODELING CYCLE BEGIN
@@ -303,7 +303,7 @@ def main(prefix):
             print('time = {} '.format(time))
 
             make_tracks_plot_file(prefix, positionCarbon, time)
-            make_intent_plot_file(prefix, intent, time)
+            make_inten_plot_file(prefix, inten, time)
             make_potential_plot_file(prefix, next_phi, time)
             make_intensity_plot_file(prefix, intensity, time)
             make_tension_plot_file(prefix, carbon_tension, time)
