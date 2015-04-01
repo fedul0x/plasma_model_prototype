@@ -1,113 +1,98 @@
 # -*- coding: utf-8 -*-
+import numpy as np
 
 __author__ = 'fedul0x'
 
-import numpy as np
-from numpy.random import rand
 
-
-# Такты моделирования
-# modelingTime = 100
-# modeling_time = 1200
-# modeling_time = 85
-modeling_time = 1200
-in_memory_time = 5
+# Время моделирования
+MODELING_TIME = 1200
+DATA_IN_MEMORY_TIME = 5
 # Электростатическая постоянная
-epsilon0 = 8.8541878E-12
+# epsilon0 = 8.8541878E-12
+ELECTROSTATIC_CONSTANT = 8.8541878E-12
+# Постоянная Больцмана
+# kb = 1.38E-23
+BOLTZMANN_CONSTANT = 1.380648813E-23
 # Число частиц в ячейке
 # numbersElectron = 1E+10
 # numbersCarbon = 1E+16
 # numbersHelium = 1E+10
-numbersElectron = 100
-numbersCarbon = 100
-numbersHelium = 100
-
+ELECTRONS_NUMBER = 100
+CARBONS_NUMBER = 100
+HELIUMS_NUMBER = 100
 # Массы частиц
-massElectron = 9.11E-31
-massCarbon = 12.011 * 1.67E-27 - 9.11E-31
-massHelium = 4.002 * 1.67E-27 - 9.11E-31
+ELECTRONS_MASS = 9.11E-31
+CARBONS_MASS = 12.011 * 1.67E-27 - 9.11E-31
+HELIUMS_MASS = 4.002 * 1.67E-27 - 9.11E-31
 # Заряды частиц
-chargeElectron = -1.602176565E-19
-chargeCarbon = 1.602176565E-19
-chargeHelium = 1.602176565E-19
+ELECTRONS_CHARGE = -1.602176565E-19
+CARBONS_CHARGE = 1.602176565E-19
+HELIUMS_CHARGE = 1.602176565E-19
 # Радиусы частиц
-radiusElectron = 2.81794E-15
-radiusCarbon = 31E-12
-radiusHelium = 91E-12
+ELECTRONS_RADIUS = 2.81794E-15
+CARBONS_RADIUS = 91E-12
+HELIUMS_RADIUS = 31E-12
+# CARBONS_RADIUS, HELIUMS_RADIUS = HELIUMS_RADIUS, CARBONS_RADIUS
 # deltaT = 1.0E-12
 # deltaT = 1.0E-2
 # deltaT = 1.0E-8
-# deltaT = 1.0E-6
-deltaT = 1.0E-8
+TIME_STEP = 1.0E-8
+# deltaT = 1.0E-8
 # deltaT = 1
 # Время метода установления
 # deltaT_ = 1.0E-12
-deltaT_ = 1.75E-10
-
+FAKE_TIME_STEP = 1.75E-10
 # Скорость выгорания анода
-burningSpeedAnode = 0.44E-5
-
-temperature = 4200
-temperatureHelium = 293
-amperage = 150
-
-kb = 1.38E-23
-Boltzmann_constant = 1.380648813E-23
-
-maxSpeedElectron = np.sqrt(2 * kb * temperature / massElectron)
-deltaSpeedElectron = 0.1*maxSpeedElectron
-maxSpeedHelium = np.sqrt(2 * kb * temperatureHelium / massHelium)
-deltaSpeedHelium = 0.1*maxSpeedHelium
-maxSpeedCarbon = np.sqrt(2 * kb * temperature / massCarbon)
-deltaSpeedCarbon = 0.1*maxSpeedCarbon
-
+ANODE_BURNING_SPEED = 0.44E-5
+# Температура процесса
+TEMPERATURE = 4200
+HELIUMS_TEMPERATURE = 293
+AMPERAGE = 150
+# Параметры распределения скорости по Максвеллу
+ELECTRONS_MAX_SPEED = np.sqrt(2*BOLTZMANN_CONSTANT*TEMPERATURE/ELECTRONS_MASS)
+ELECTRONS_DELTA_SPEED = 0.1*ELECTRONS_MAX_SPEED
+HELIUMS_MAX_SPEED = \
+    np.sqrt(2*BOLTZMANN_CONSTANT*HELIUMS_TEMPERATURE/HELIUMS_MASS)
+HELIUMS_DELTA_SPEED = 0.1*HELIUMS_MAX_SPEED
+CARBONS_MAX_SPEED = np.sqrt(2*BOLTZMANN_CONSTANT*TEMPERATURE/CARBONS_MASS)
+CARBONS_DELTA_SPEED = 0.1*CARBONS_MAX_SPEED
 # Размеры сетки
-xDimensionGrid = 1.0E-3
-yDimensionGrid = 1.0E-2
-zDimensionGrid = 1.0E-2
-# число шагов по сетке для крупных частиц
-xNumberStepGrid = 25  #im
-yNumberStepGrid = 25  #km
-zNumberStepGrid = 25  #lm
-xInitNumberStepGrid = 50  #imm
-yInitNumberStepGrid = 50  #kmm
-zInitNumberStepGrid = 50  #lmm
-# шаг по сетке
-xStepGrid = xDimensionGrid / xNumberStepGrid  #hx
-yStepGrid = yDimensionGrid / yNumberStepGrid  #hy
-zStepGrid = zDimensionGrid / zNumberStepGrid  #hz
-# шаг по сетке(для начального положения частиц)
-xInitStepGrid = xDimensionGrid / xInitNumberStepGrid  #hxx
-yInitStepGrid = yDimensionGrid / yInitNumberStepGrid  #hyy
-zInitStepGrid = zDimensionGrid / zInitNumberStepGrid  #hzz
-
-phi_limit_value =100
-# Коэффициенты скорости
-# Kvu2 = 0.005
-# Kvu1 = (3-2*Kvu2**2)
-# TODO Исправить коэффициенты
-Kvu2 = 0.47619047619047616
-Kvu1 = 0.04761904761904767
-
+X_DIMENSION_GRID = 1.0E-3
+Y_DIMENSION_GRID = 1.0E-2
+Z_DIMENSION_GRID = 1.0E-2
+# Число шагов по сетке для крупных частиц
+X_STEP_NUMBER_GRID = 5
+Y_STEP_NUMBER_GRID = 5
+Z_STEP_NUMBER_GRID = 5
+# Шаг по сетке
+X_STEP = X_DIMENSION_GRID / X_STEP_NUMBER_GRID
+Y_STEP = Y_DIMENSION_GRID / Y_STEP_NUMBER_GRID
+Z_STEP = Z_DIMENSION_GRID / Z_STEP_NUMBER_GRID
+# Начальное значение потенциала
+POTENTIAL_BOUND_VALUE = 5000
 # Коэффициенты скорости для перехода к безразмерным величинам
-Mnue = np.sqrt(2*kb*temperature/massElectron)
-Mnuc = np.sqrt(2*kb*temperature/massCarbon)
-Mnuh = np.sqrt(2*kb*temperatureHelium/massHelium)
+ELECTRON_SPEED_DIMENSIONLESS_UNIT = \
+    np.sqrt(2*BOLTZMANN_CONSTANT*TEMPERATURE/ELECTRONS_MASS)
+CARBON_SPEED_DIMENSIONLESS_UNIT = \
+    np.sqrt(2*BOLTZMANN_CONSTANT*TEMPERATURE/CARBONS_MASS)
+HELLIUM_SPEED_DIMENSIONLESS_UNIT = \
+    np.sqrt(2*BOLTZMANN_CONSTANT*HELIUMS_TEMPERATURE/HELIUMS_MASS)
+Mnue = np.sqrt(2*BOLTZMANN_CONSTANT*TEMPERATURE/ELECTRONS_MASS)
+Mnuc = np.sqrt(2*BOLTZMANN_CONSTANT*TEMPERATURE/CARBONS_MASS)
+Mnuh = np.sqrt(2*BOLTZMANN_CONSTANT*HELIUMS_TEMPERATURE/HELIUMS_MASS)
 
 # Коэффициенты для перехода к безразмерному пространству
-Ml = np.sqrt(kb*epsilon0*temperature)/np.abs(chargeElectron)/np.sqrt(numbersCarbon)
-
+Ml = np.sqrt(BOLTZMANN_CONSTANT*ELECTROSTATIC_CONSTANT*TEMPERATURE) \
+    / np.abs(ELECTRONS_CHARGE) / np.sqrt(CARBONS_NUMBER)
 # Коэффициенты для перехода к безразмерной напряженности
 Mee = 8090.769400
-
 # Метод установления
 # epsilon = 0.001
-epsilon = 0.01
-
+# epsilon = 0.01
+ESTABLISHING_METHOD_ACCURACY = 0.01
 # Mve = 3.5671E+5
-
 # ЧТо такое hi
-hi = 10
+hi = 10 #0..1
 
 
 
