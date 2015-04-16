@@ -39,9 +39,6 @@ HELIUMS_RADIUS = 31E-12
 TIME_STEP = 1.0E-2
 # deltaT = 1.0E-8
 # deltaT = 1
-# Время метода установления
-# deltaT_ = 1.0E-12
-FAKE_TIME_STEP = 1.75E-10
 # Скорость выгорания анода
 ANODE_BURNING_SPEED = 0.44E-5
 # Температура процесса
@@ -61,16 +58,22 @@ X_DIMENSION_GRID = 1.0E-3
 Y_DIMENSION_GRID = 1.0E-2
 Z_DIMENSION_GRID = 1.0E-2
 # Число шагов по сетке для крупных частиц
-X_STEP_NUMBER_GRID = 50
-Y_STEP_NUMBER_GRID = 50
-Z_STEP_NUMBER_GRID = 50
-# X_STEP_NUMBER_GRID = 10
-# Y_STEP_NUMBER_GRID = 10
-# Z_STEP_NUMBER_GRID = 10
+# X_STEP_NUMBER_GRID = 50
+# Y_STEP_NUMBER_GRID = 50
+# Z_STEP_NUMBER_GRID = 50
+X_STEP_NUMBER_GRID = 54
+Y_STEP_NUMBER_GRID = 54
+Z_STEP_NUMBER_GRID = 54
 # Шаг по сетке
 X_STEP = X_DIMENSION_GRID / X_STEP_NUMBER_GRID
 Y_STEP = Y_DIMENSION_GRID / Y_STEP_NUMBER_GRID
 Z_STEP = Z_DIMENSION_GRID / Z_STEP_NUMBER_GRID
+# Начальное значение времени метода установления
+# deltaT_ = 1.0E-12
+FAKE_TIME_STEP = 1.75E-9
+while (FAKE_TIME_STEP/X_STEP**2 + FAKE_TIME_STEP/Y_STEP**2 + FAKE_TIME_STEP/Z_STEP**2 > 0.5):
+	FAKE_TIME_STEP /= 2
+# print('FAKE_TIME_STEP = {}'.format(FAKE_TIME_STEP))
 # Начальное значение потенциала
 POTENTIAL_BOUND_VALUE = 50
 # Коэффициенты скорости для перехода к безразмерным величинам

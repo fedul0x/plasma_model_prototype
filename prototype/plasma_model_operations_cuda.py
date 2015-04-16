@@ -224,6 +224,7 @@ def main(prefix):
     while (time < MODELING_TIME):
         curr_time = p_time(time)
         # Заряд в узлах
+        print('Calc charge in cells')
         electron_charge_grid = np.zeros([x_range.shape[0], y_range.shape[0], z_range.shape[0]])
         carbon_charge_grid = np.zeros([x_range.shape[0], y_range.shape[0], z_range.shape[0]])
         helium_charge_grid = np.zeros([x_range.shape[0], y_range.shape[0], z_range.shape[0]])
@@ -251,6 +252,7 @@ def main(prefix):
         prev_phi, next_phi, ro = \
             make_boundary_conditions(phi, n, ecg, ccg, hcg)
         # Метод установления
+        print('Establishing method')
         prev_phi, next_phi = \
             potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=ESTABLISHING_METHOD_ACCURACY)
             # potential_establish_method(prev_phi, next_phi, ro, epsilon=ESTABLISHING_METHOD_ACCURACY)
@@ -300,8 +302,8 @@ def main(prefix):
             for l in range(carbon.shape[2]):
                 carbon[p_next_time(time)][num][l] = carbon[curr_time][num][l]
             for dim in range(3):
-                import pdb
-                pdb.set_trace()
+                # import pdb
+                # pdb.set_trace()
                 v = speeds[dim]
                 r = carbon[curr_time][num][dim]/SPACE_DIMENSIONLESS_UNIT
                 E = carbon_tension[num][dim]/INTENSITY_DIMENSIONLESS_UNIT
@@ -323,7 +325,45 @@ def main(prefix):
         time += 1
         print('time = {} '.format(time))
 
-        make_tracks_plot_file(prefix, carbon, time)
+        # # Стокновения углерода и электронов
+        # pe = electron
+        # ph = helium
+        # pc = carbon
+        # # lastCrashesElectron = crashesElectron
+        # crashesElectron = []
+        # crashesHelium = []
+        # print('1')
+
+        # for c in range(pc.shape[1]):
+        #     for e in range(pe.shape[1]):
+        #         print(e, c)
+        #         if np.sqrt((pe[curr_time][e][0] - pc[curr_time][c][0] )**2 + (pe[curr_time][e][1] - pc[curr_time][c][1] )**2 + (pe[curr_time][e][2] - pc[curr_time][c][2] )**2)  <= pe[curr_time][e][3] + pc[curr_time][c][3]  and \
+        #             np.sqrt((pe[curr_time][e][0] - pc[curr_time][c][0] )**2 + (pe[curr_time][e][1] - pc[curr_time][c][1] )**2 + (pe[curr_time][e][2] - pc[curr_time][c][2] )**2) > np.abs(pe[curr_time][e][3] - pc[curr_time][c][3]):
+
+        #             crashesElectron += [pe[curr_time][e].copy()]
+        #             # spd1 = [(2 * massElectron * pe[curr_time][e][p]  + pc[curr_time][c][p]* (massCarbon - massElectron))/(massCarbon + massElectron) for p in range(5, 8)]
+        #             # spd2 = [(2 * massCarbon * pc[curr_time][c][p]  + pe[curr_time][e][p]* (massElectron - massCarbon))/(massCarbon + massElectron) for p in range(5, 8)]
+
+        #             # pc[curr_time][c][5], pc[curr_time][c][6], pc[curr_time][c][7] = spd1[0], spd1[1], spd1[2]
+        #             # pe[curr_time][e][5], pe[curr_time][e][6], pe[curr_time][e][7] = spd2[0], spd2[1], spd2[2]
+        #     for h in range(ph.shape[1]):
+        #         if np.sqrt((ph[curr_time][h][0] - pc[curr_time][c][0] )**2 + (ph[curr_time][h][1] - pc[curr_time][c][1] )**2 + (ph[curr_time][h][2] - pc[curr_time][c][2] )**2)  <= ph[curr_time][h][3] + pc[curr_time][c][3] and \
+        #             np.sqrt((ph[curr_time][h][0] - pc[curr_time][c][0] )**2 + (ph[curr_time][h][1] - pc[curr_time][c][1] )**2 + (ph[curr_time][h][2] - pc[curr_time][c][2] )**2) > np.abs(ph[curr_time][h][3] - pc[curr_time][c][3]):
+
+        #             crashesHelium += [ph[curr_time][h][:]]
+        #             # spd1 = [(2 * massHelium * ph[curr_time][h][p]  + pc[curr_time][c][p]* (massCarbon - massHelium))/(massCarbon + massHelium) for p in range(5, 8)]
+        #             # spd2 = [(2 * massCarbon * pc[curr_time][c][p]  + ph[curr_time][h][p]* (massHelium - massCarbon))/(massCarbon + massHelium) for p in range(5, 8)]
+        #             # pc[curr_time][c][5], pc[curr_time][c][6], pc[curr_time][c][7] = spd1[0], spd1[1], spd1[2]
+        #             # ph[curr_time][h][5], ph[curr_time][h][6], ph[curr_time][h][7] = spd2[0], spd2[1], spd2[2]
+        # # pc = carbon
+        # # print('1.5')
+        # # # lastCrashesHelium = crashesHelium
+        # #     for c in range(pc.shape[1]):
+        # #         print(h, c)
+        # # print('2')
+        
+        # make_tracks_plot_file(prefix, carbon, time)
+        make_tracks_plot_file_with_crashes(prefix, carbon, crashesElectron, crashesHelium, time)
         make_inten_plot_file(prefix, inten, time)
         # make_potential_plot_file(prefix, next_phi, time)
         # make_intensity_plot_file(prefix, intensity, time)

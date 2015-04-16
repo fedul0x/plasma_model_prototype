@@ -79,7 +79,7 @@ def potential_establish_method(prev_phi, next_phi, ro, epsilon=0.01):
     return (prev_phi, next_phi)
 
 
-def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
+def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01, delta_t=1.75E-10):
     f = open('./kernel_1.cu', 'r')
     mod = SourceModule("".join(f.readlines()))
     n = prev_phi.shape
@@ -107,7 +107,7 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
         potential_establish(
             prev_phi_gpu, next_phi_gpu,
             drv.In(ro), drv.InOut(subSum),
-            drv.In(step), drv.In(sizes),
+            drv.In(step), drv.In(sizes), np.float32(FAKE_TIME_STEP),
             block=(bd, 1, 1), grid=(gd, 1))
         for s in range(subSum.shape[0]):
             subSum[s] = 0.0
@@ -115,7 +115,7 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
         potential_establish(
             next_phi_gpu, prev_phi_gpu,
             drv.In(ro), drv.InOut(subSum),
-            drv.In(step), drv.In(sizes),
+            drv.In(step), drv.In(sizes), np.float32(FAKE_TIME_STEP),
             block=(bd, 1, 1), grid=(gd, 1))
         count += 1
         ssum = 0
@@ -169,7 +169,7 @@ def make_potential_plot_file(prefix, next_phi_1, next_phi_2, sums_1, sums_2, tim
         for j in range(n[1]):
             plot_phi[i][j] = next_phi_2[i][j][n[2]//2]
     m2 = ax_2.contourf(plot_phi.T)
-    fig.colorbar(m1)
+    fig.colorbar(m2)
     # ax_2.colorbar()
     ax_3.plot(sums_1)
     ax_3.set_title(sum(sums_1))
@@ -200,18 +200,19 @@ def main():
         electron_charge_grid, carbon_charge_grid, helium_charge_grid
     prev_phi, next_phi, ro = \
         make_boundary_conditions(phi, n, ecg, ccg, hcg)
-    prev_phi_2, next_phi_2, _ = \
-        make_boundary_conditions(phi/2, n, ecg, ccg, hcg)
-        # prev_phi.copy(), next_phi.copy()
+    prev_phi_2, next_phi_2 = \
+        prev_phi.copy(), next_phi.copy()
+        # make_boundary_conditions(phi/2, n, ecg, ccg, hcg)
 
     generator_1 = potential_establish_method(prev_phi, next_phi, ro, epsilon=ESTABLISHING_METHOD_ACCURACY)
     generator_2 = potential_establish_method_cuda(prev_phi_2, next_phi_2, ro, epsilon=ESTABLISHING_METHOD_ACCURACY)
     # Метод установления
     prefix = make_dir_prefix()
     for i in range(300):
-        next_phi_1, _, sums_1 = next(generator_1)
+        # next_phi_1, _, sums_1 = next(generator_1)
         # next_phi_2, sums_2 = next_phi_1, sums_1
         next_phi_2, _, sums_2 = next(generator_2)
+        next_phi_1, sums_1 = next_phi_2, sums_2
         # print(sums)
         # print(prev_phi, next_phi, sums)
         make_potential_plot_file(prefix, next_phi_1, next_phi_2, sums_1, sums_2, i)

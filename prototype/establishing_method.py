@@ -88,19 +88,18 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
         potential_establish(
             prev_phi_gpu, next_phi_gpu,
             drv.In(ro), drv.InOut(subSum),
-            drv.In(step), drv.In(sizes),
+            drv.In(step), drv.In(sizes), np.float32(FAKE_TIME_STEP),
             block=(bd, 1, 1), grid=(gd, 1))
         for s in range(subSum.shape[0]):
             subSum[s] = 0.0
         potential_establish(
             next_phi_gpu, prev_phi_gpu,
             drv.In(ro), drv.InOut(subSum),
-            drv.In(step), drv.In(sizes),
+            drv.In(step), drv.In(sizes), np.float32(FAKE_TIME_STEP),
             block=(bd, 1, 1), grid=(gd, 1))
         ssum = 0
         for s in subSum:
             ssum += s
-        print('ERROR {}'.format(ssum))
     drv.memcpy_dtoh(prev_phi, prev_phi_gpu)
     drv.memcpy_dtoh(next_phi, next_phi_gpu)
     prev_phi_gpu.free()

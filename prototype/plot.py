@@ -51,9 +51,9 @@ def make_2d_plot_with_tracks(ax, position, time, n):
         x_big, y_big = \
             get_component(position[time][num], n=2)
         ax.scatter(x_big, y_big, color='red')
-        xes = [position[t][num][0] for t in range(time)]
-        yes = [position[t][num][1] for t in range(time)]
-        ax.plot(xes, yes)
+        # xes = [position[t][num][0] for t in range(time)]
+        # yes = [position[t][num][1] for t in range(time)]
+        # ax.plot(xes, yes)
 
     return ax
 
@@ -76,6 +76,41 @@ def make_tracks_plot_file(prefix, position, time):
     plt.savefig("{}/carbon_speed_by_pn_time={:04d}".format(directory, time))
     plt.clf()
     plt.close()
+
+
+def make_tracks_plot_file_with_crashes(prefix, position, electron_crashes, helium_crashes, time):
+    directory = make_dir(prefix, 'by_time')
+    n = (X_DIMENSION_GRID, Y_DIMENSION_GRID, Z_DIMENSION_GRID)
+    fig = plt.figure()
+    ax = fig.add_subplot(211, projection='3d')
+    ax2 = fig.add_subplot(212)
+    plt.title('time = {} '.format(time))
+    ax = make_3d_plot_with_speed(ax, position, p_prev_time(time), n, plot_type='COORD')
+    ax2 = make_2d_plot_with_tracks(ax2, position, p_prev_time(time), n)
+    n = len(electron_crashes)
+    for num in range(n):
+        x_big, y_big, z_big = \
+            get_component(electron_crashes[num], n=3)
+        ax.scatter(x_big, y_big, z_big, color='blue')
+        ax2.scatter(x_big, y_big, color='blue')
+    n = len(helium_crashes)
+    for num in range(n):
+        x_big, y_big, z_big = \
+            get_component(helium_crashes[num], n=3)
+        ax.scatter(x_big, y_big, z_big, color='black')
+        ax2.scatter(x_big, y_big, color='black')
+    # plt.show()
+    plt.savefig("{}/carbon_two_coord_{:04d}.png".format(directory, time))
+    plt.clf()
+    plt.close()
+
+    plt.plot([Mnuc*np.sqrt(position[p_prev_time(time)][i][5]**2 + position[p_prev_time(time)][i][6]**2 + position[p_prev_time(time)][i][7]**2)  for i in range(position.shape[1])])
+    plt.title('carbon speed from particle number time = {} '.format(time))
+    plt.savefig("{}/carbon_speed_by_pn_time={:04d}".format(directory, time))
+    plt.clf()
+    plt.close()
+
+
 
 
 def make_inten_plot_file(prefix, inten, time):
