@@ -204,15 +204,15 @@ def main():
         prev_phi.copy(), next_phi.copy()
         # make_boundary_conditions(phi/2, n, ecg, ccg, hcg)
 
-    generator_1 = potential_establish_method(prev_phi, next_phi, ro, epsilon=ESTABLISHING_METHOD_ACCURACY)
-    generator_2 = potential_establish_method_cuda(prev_phi_2, next_phi_2, ro, epsilon=ESTABLISHING_METHOD_ACCURACY)
+    generator_1 = potential_establish_method(prev_phi, next_phi, ro, epsilon=ESTABLISHING_METHOD_ACCURACY*10000)
+    generator_2 = potential_establish_method_cuda(prev_phi_2, next_phi_2, ro, epsilon=ESTABLISHING_METHOD_ACCURACY*10000)
     # Метод установления
     prefix = make_dir_prefix()
     for i in range(300):
-        # next_phi_1, _, sums_1 = next(generator_1)
+        next_phi_1, _, sums_1 = next(generator_1)
         # next_phi_2, sums_2 = next_phi_1, sums_1
         next_phi_2, _, sums_2 = next(generator_2)
-        next_phi_1, sums_1 = next_phi_2, sums_2
+        # next_phi_1, sums_1 = next_phi_2, sums_2
         # print(sums)
         # print(prev_phi, next_phi, sums)
         make_potential_plot_file(prefix, next_phi_1, next_phi_2, sums_1, sums_2, i)

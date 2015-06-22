@@ -7,7 +7,7 @@ from plasma_model_operations_cuda import get_component, p_prev_time, make_dir
 from constant import *
 
 
-def make_3d_plot_with_speed(ax, position, time, n, plot_type='SPEED'):
+def make_3d_plot_with_speed(ax, position, time, n, plot_type='SPEED', annotated=False):
     ax.set_xlim3d([0, n[0]])
     ax.set_ylim3d([0, n[1]])
     ax.set_zlim3d([0, n[2]])
@@ -32,11 +32,12 @@ def make_3d_plot_with_speed(ax, position, time, n, plot_type='SPEED'):
                 values = get_component(position[time][num])
                 str_label = '{:5.7f},{:5.7f},{:5.7f}'.\
                     format(values[0], values[1], values[2])
-            labels[i][j][k] = \
-                ax.annotate(str_label, xy=(x2, y2), xytext=(-15, 15),
-                textcoords='offset points', ha='right', va='bottom',
-                bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
-                arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0'))
+            if annotated:
+                labels[i][j][k] = \
+                    ax.annotate(str_label, xy=(x2, y2), xytext=(-15, 15),
+                    textcoords='offset points', ha='right', va='bottom',
+                    bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
+                    arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0'))
 
     return ax
 
@@ -78,7 +79,7 @@ def make_tracks_plot_file(prefix, position, time):
     plt.close()
 
 
-def make_tracks_plot_file_with_crashes(prefix, position, electron_crashes, helium_crashes, time):
+def make_tracks_plot_file_with_crashes(prefix, position, electron_crashes, helium_crashes, carbon_crashes, time):
     directory = make_dir(prefix, 'by_time')
     n = (X_DIMENSION_GRID, Y_DIMENSION_GRID, Z_DIMENSION_GRID)
     fig = plt.figure()
@@ -88,29 +89,33 @@ def make_tracks_plot_file_with_crashes(prefix, position, electron_crashes, heliu
     ax = make_3d_plot_with_speed(ax, position, p_prev_time(time), n, plot_type='COORD')
     ax2 = make_2d_plot_with_tracks(ax2, position, p_prev_time(time), n)
     n = len(electron_crashes)
-    for num in range(n):
+    for num in electron_crashes:
         x_big, y_big, z_big = \
-            get_component(electron_crashes[num], n=3)
-        ax.scatter(x_big, y_big, z_big, color='blue')
-        ax2.scatter(x_big, y_big, color='blue')
+            get_component(num, n=3)
+        ax.scatter(x_big, y_big, z_big, color='green', s=40, marker='x')
+        ax2.scatter(x_big, y_big, color='green', s=40, marker='x')
     n = len(helium_crashes)
-    for num in range(n):
+    for num in helium_crashes:
         x_big, y_big, z_big = \
-            get_component(helium_crashes[num], n=3)
-        ax.scatter(x_big, y_big, z_big, color='black')
-        ax2.scatter(x_big, y_big, color='black')
+            get_component(num, n=3)
+        ax.scatter(x_big, y_big, z_big, color='blue', s=35, marker='+')
+        ax2.scatter(x_big, y_big, color='blue', s=35, marker='+')
+    n = len(carbon_crashes)
+    for num in carbon_crashes:
+        x_big, y_big, z_big = \
+            get_component(num, n=3)
+        ax.scatter(x_big, y_big, z_big, color='blue', s=35, marker='*')
+        ax2.scatter(x_big, y_big, color='blue', s=35, marker='*')
     # plt.show()
     plt.savefig("{}/carbon_two_coord_{:04d}.png".format(directory, time))
     plt.clf()
     plt.close()
 
-    plt.plot([Mnuc*np.sqrt(position[p_prev_time(time)][i][5]**2 + position[p_prev_time(time)][i][6]**2 + position[p_prev_time(time)][i][7]**2)  for i in range(position.shape[1])])
-    plt.title('carbon speed from particle number time = {} '.format(time))
-    plt.savefig("{}/carbon_speed_by_pn_time={:04d}".format(directory, time))
-    plt.clf()
-    plt.close()
-
-
+    # plt.plot([Mnuc*np.sqrt(position[p_prev_time(time)][i][5]**2 + position[p_prev_time(time)][i][6]**2 + position[p_prev_time(time)][i][7]**2)  for i in range(position.shape[1])])
+    # plt.title('carbon speed from particle number time = {} '.format(time))
+    # plt.savefig("{}/carbon_speed_by_pn_time={:04d}".format(directory, time))
+    # plt.clf()
+    # plt.close()
 
 
 def make_inten_plot_file(prefix, inten, time):
@@ -181,7 +186,7 @@ def make_tension_plot_file(prefix, tension, time):
     plt.clf()
     plt.close()
 
-def make_distribution_plot_file(prefix, begin, end, time):
+def make_distribution_plot_file(prefix, begin, end):
     directory = make_dir(prefix, 'graphs')
     # fig, (ax1, ax2) = plt.subplots(2)
     # ax1.hist(begin, normed=True, histtype='stepfilled')
@@ -195,6 +200,28 @@ def make_distribution_plot_file(prefix, begin, end, time):
     # ax1.set_title("distribution at begin")
     # ax2.set_title("distribution at end")
     plt.savefig("{}/speed_distribution".format(directory))
+    plt.clf()
+    plt.close()
+
+
+def make_collision_distribution_plot_file(prefix, typeI, typeII, typeIII):
+    directory = make_dir(prefix, 'graphs')
+    # fig, (ax1, ax2) = plt.subplots(2)
+    # ax1.hist(begin, normed=True, histtype='stepfilled')
+    # ax2.hist(end, normed=True, histtype='stepfilled')
+    # ax1.set_title("distribution at begin")
+    # ax2.set_title("distribution at end")
+    # fig, ax1 = plt.subplots(1)
+    if typeI != []:
+    	plt.hist(typeI, alpha=0.6, normed=True, histtype='stepfilled', label='I')
+    if typeII != []:
+    	plt.hist(typeII, alpha=0.6, normed=True, histtype='stepfilled', label='II')
+    if typeIII != []:
+    	plt.hist(typeIII, alpha=0.6, normed=True, histtype='stepfilled', label='III')
+    plt.legend()
+    # ax1.set_title("distribution at begin")
+    # ax2.set_title("distribution at end")
+    plt.savefig("{}/collision_distribution".format(directory))
     plt.clf()
     plt.close()
 

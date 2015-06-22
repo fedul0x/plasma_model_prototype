@@ -3,7 +3,8 @@ import numpy as np
 
 __author__ = 'fedul0x'
 
-
+# Параметры моделирования
+FAST_ESTABLISHING_METHOD = True
 # Время моделирования
 MODELING_TIME = 1200
 DATA_IN_MEMORY_TIME = 3
@@ -13,13 +14,15 @@ ELECTROSTATIC_CONSTANT = 8.8541878E-12
 # Постоянная Больцмана
 # kb = 1.38E-23
 BOLTZMANN_CONSTANT = 1.380648813E-23
+# Число Авогадро
+AVOGADRO_CONSTANT = 6.0221412927E+23
 # Число частиц в ячейке
 # numbersElectron = 1E+10
 # numbersCarbon = 1E+16
 # numbersHelium = 1E+10
-ELECTRONS_NUMBER = 10E+12
-CARBONS_NUMBER = 10E+12
-HELIUMS_NUMBER = 10E+6
+ELECTRONS_NUMBER = 1E+12
+CARBONS_NUMBER = 1E+12
+HELIUMS_NUMBER = 1E+6
 # Массы частиц
 ELECTRONS_MASS = 9.11E-31
 CARBONS_MASS = 12.011 * 1.67E-27 - 9.11E-31
@@ -37,12 +40,14 @@ HELIUMS_RADIUS = 31E-12
 # deltaT = 1.0E-2
 # deltaT = 1.0E-8
 TIME_STEP = 1.0E-2
+# TIME_STEP = 1.0E-1
 # deltaT = 1.0E-8
 # deltaT = 1
 # Скорость выгорания анода
 ANODE_BURNING_SPEED = 0.44E-5
 # Температура процесса
-TEMPERATURE = 4200
+# TEMPERATURE = 4200
+TEMPERATURE = 10000
 HELIUMS_TEMPERATURE = 293
 AMPERAGE = 150
 # Параметры распределения скорости по Максвеллу
@@ -58,18 +63,17 @@ X_DIMENSION_GRID = 1.0E-3
 Y_DIMENSION_GRID = 1.0E-2
 Z_DIMENSION_GRID = 1.0E-2
 # Число шагов по сетке для крупных частиц
-# X_STEP_NUMBER_GRID = 50
-# Y_STEP_NUMBER_GRID = 50
-# Z_STEP_NUMBER_GRID = 50
-X_STEP_NUMBER_GRID = 54
-Y_STEP_NUMBER_GRID = 54
-Z_STEP_NUMBER_GRID = 54
+X_STEP_NUMBER_GRID = 50
+Y_STEP_NUMBER_GRID = 50
+Z_STEP_NUMBER_GRID = 50
+# X_STEP_NUMBER_GRID = 10
+# Y_STEP_NUMBER_GRID = 10
+# Z_STEP_NUMBER_GRID = 10
 # Шаг по сетке
 X_STEP = X_DIMENSION_GRID / X_STEP_NUMBER_GRID
 Y_STEP = Y_DIMENSION_GRID / Y_STEP_NUMBER_GRID
 Z_STEP = Z_DIMENSION_GRID / Z_STEP_NUMBER_GRID
 # Начальное значение времени метода установления
-# deltaT_ = 1.0E-12
 FAKE_TIME_STEP = 1.75E-9
 while (FAKE_TIME_STEP/X_STEP**2 + FAKE_TIME_STEP/Y_STEP**2 + FAKE_TIME_STEP/Z_STEP**2 > 0.5):
 	FAKE_TIME_STEP /= 2

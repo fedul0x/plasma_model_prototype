@@ -74,8 +74,8 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
     bd = int((n[0]-2)*(n[1]-2)*(n[2]-2)/gd)
     if (bd != (n[0]-2)*(n[1]-2)*(n[2]-2)/gd):
         bd += 1
-    print('gd={}, bd = {} ===================='.format(gd, bd))
-    print('sizes={}'.format(sizes))
+    # print('gd={}, bd = {} ===================='.format(gd, bd))
+    # print('sizes={}'.format(sizes))
 
     prev_phi_gpu = drv.mem_alloc((prev_phi.size) * prev_phi.dtype.itemsize)
     next_phi_gpu = drv.mem_alloc((next_phi.size) * next_phi.dtype.itemsize)
