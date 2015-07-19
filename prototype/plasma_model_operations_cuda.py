@@ -222,6 +222,8 @@ def main(prefix):
     # Для итоговых графиков
     listen_particles = [0, int(carbon.shape[1]/2), carbon.shape[1]-1]
     plot_data = [[] for _ in listen_particles]
+    typeI, typeII, typeIII = [], [], []
+    max_distances = []
     try:
         while (time < MODELING_TIME):
             curr_time = p_time(time)
@@ -273,6 +275,7 @@ def main(prefix):
                     prev_phi, next_phi, ro = \
                         make_boundary_conditions(phi, n, ecg, ccg, hcg)
                 else:
+                    print('ECONOMIC')
                     _, _, ro = \
                         make_boundary_conditions(phi, n, ecg, ccg, hcg)
             else:
@@ -395,7 +398,19 @@ def main(prefix):
             helium_collision = distribute_by_grid(helium, helium_collision, curr_time)    
             carbon_collision = distribute_by_grid(carbon, carbon_collision, curr_time)
             crashesCarbon, crashesElectron, crashesHelium = [], [], []
-            typeI, typeII, typeIII = [], [], []
+            
+            max_distance_x, max_distance_y, max_distance_z = 0.0, 0.0, 0.0
+            for i in range(carbon.shape[1]):
+                if np.abs(carbon[p_time(time)][i][0] - carbon[p_next_time(time)][i][0]) > max_distance_x:
+                    max_distance_x = np.abs(carbon[p_time(time)][i][0] - carbon[p_next_time(time)][i][0])
+                if np.abs(carbon[p_time(time)][i][1] - carbon[p_next_time(time)][i][1]) > max_distance_y:
+                    max_distance_y = np.abs(carbon[p_time(time)][i][1] - carbon[p_next_time(time)][i][1])
+                if np.abs(carbon[p_time(time)][i][2] - carbon[p_next_time(time)][i][2]) > max_distance_z:
+                    max_distance_z = np.abs(carbon[p_time(time)][i][2] - carbon[p_next_time(time)][i][2])
+
+            max_distances += [(max_distance_x, max_distance_y, max_distance_z)]
+            msg = "MAX DIST BY COORDS: \n{}<{}, \n{}<{}, \n{}<{}"
+            print(msg.format(max_distance_x, X_STEP_COLLISION, max_distance_y, Y_STEP_COLLISION, max_distance_z, Z_STEP_COLLISION))
 
             for i in range(X_DIMENSION_COLLISION):
                 for j in range(Y_DIMENSION_COLLISION):
@@ -419,8 +434,8 @@ def main(prefix):
                                     # print('C  ({:.4f}, {:.4f}, {:.4f})\n=> ({:.4f}, {:.4f}, {:.4f})'.format(vcx, vcy, vcz, carbon[curr_time][a][5], carbon[curr_time][a][6], carbon[curr_time][a][7]))
                             for b in carbon_collision[i][j][k]:
                                 xc_2, yc_2, zc_2, radiusc_2, _, vcx_2, vcy_2, vcz_2 = carbon[curr_time][b]
-                                # TODO remove 5*
-                                if (a != b) and (np.sqrt((xc-xc_2)**2 + (yc-yc_2)**2 + (zc-zc_2)**2) < 9*(radiusc + radiusc_2)):
+                                # TODO remove 45*
+                                if (a != b) and (np.sqrt((xc-xc_2)**2 + (yc-yc_2)**2 + (zc-zc_2)**2) < (radiusc + radiusc_2)):
                                     crashesCarbon += [tuple(carbon[curr_time][b][:])]
                                     m_1 = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
                                     m_2 = CARBONS_MASS*radiusc_2**3 / hi / CARBONS_RADIUS**3
@@ -428,18 +443,21 @@ def main(prefix):
                                     v_2 = CARBON_SPEED_DIMENSIONLESS_UNIT*np.sqrt(vcx_2**2 + vcy_2**2 + vcz_2**2)
                                     e_1 = m_1 * v_1**2 / 2 / CARBONS_NUMBER * AVOGADRO_CONSTANT
                                     e_2 = m_2 * v_2**2 / 2 / CARBONS_NUMBER * AVOGADRO_CONSTANT
+                                    print('E1 = {} E2 = {} sum = {}'.format(e_1, e_2, e_1+e_2))
+                                    # 348000
                                     if e_1 + e_2 > 348000:
                                         typeI += [carbon[curr_time][b][0]]
                                         continue
+                                        # 614000
                                     if e_1 + e_2 > 614000:
                                         typeII += [carbon[curr_time][b][0]]
                                         continue
+                                        # 839000
                                     if e_1 + e_2 > 839000:
                                         typeIII += [carbon[curr_time][b][0]]
                                         continue
                                     # e_1 = m_1 * v_1**2 / 2 * AVOGADRO_CONSTANT
                                     # e_2 = m_2 * v_2**2 / 2 * AVOGADRO_CONSTANT
-                                    print('E1 = {} E2 = {} sum = {}'.format(e_1, e_2, e_1+e_2))
                             for b in helium_collision[i][j][k]:
                                 xh, yh, zh, radiush, _, vhx, vhy, vhz = helium[curr_time][b]
                                 # TODO remove 5*
@@ -461,6 +479,18 @@ def main(prefix):
             time += 1
             print('time = {} '.format(time))
 
+            directory = make_dir(prefix, 'graphs')
+            plt.plot([i[0] for i in max_distances], color='red', label='x')
+            plt.plot([0, len(max_distances)], [X_STEP_COLLISION, X_STEP_COLLISION], linestyle=':', lw=6, color='red')
+            plt.plot([i[1] for i in max_distances], color='green', label='y')
+            plt.plot([0, len(max_distances)], [Y_STEP_COLLISION, Y_STEP_COLLISION], linestyle=':', lw=6, color='green')
+            plt.plot([i[2] for i in max_distances], color='blue', label='z')
+            plt.plot([0, len(max_distances)], [Z_STEP_COLLISION, Z_STEP_COLLISION], linestyle=':', lw=6, color='blue')
+            plt.legend()
+            plt.savefig("{}/max_distances".format(directory))
+            plt.clf()
+            plt.close()
+            
             
             # make_tracks_plot_file(prefix, carbon, time)
             make_tracks_plot_file_with_crashes(prefix, carbon, set(crashesElectron), set(crashesHelium), set(crashesCarbon), time)
@@ -491,6 +521,7 @@ def main(prefix):
     print (begin_speed_distribution_data)
     print (end_speed_distribution_data)
     make_distribution_plot_file(prefix, begin_speed_distribution_data, end_speed_distribution_data)
+    print('typeI: {} \ntypeII: {} \ntypeIII {}'.format(typeI, typeII, typeIII))
     make_collision_distribution_plot_file(prefix, typeI, typeII, typeIII)
     make_speed_position_plot_file(prefix, plot_data, listen_particles, time)
 
