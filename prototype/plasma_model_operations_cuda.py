@@ -221,7 +221,7 @@ def main(prefix):
     prev_phi, next_phi = None, None
     # Для итоговых графиков
     listen_particles = [0, int(carbon.shape[1]/2), carbon.shape[1]-1]
-    plot_data = [[] for _ in listen_particles]
+    plot_data = [[[]] for _ in listen_particles]
     typeI, typeII, typeIII = [], [], []
     max_distances = []
     try:
@@ -240,6 +240,11 @@ def main(prefix):
                 for num in range(position.shape[1]):
                     # print(name)
                     x_big, y_big, z_big, _, charge, _, _, _ = position[curr_time][num]
+                    try:
+                        i, j, k = \
+                            int(x_big/X_STEP), int(y_big/Y_STEP), int(z_big/Z_STEP)
+                    except Exception:
+                        print('{}/{}, {}/{}, {}/{}'.format(x_big, X_STEP, y_big, Y_STEP, z_big, Z_STEP))
                     i, j, k = \
                         int(x_big/X_STEP), int(y_big/Y_STEP), int(z_big/Z_STEP)
 
@@ -255,6 +260,9 @@ def main(prefix):
                             x_big, y_big, z_big, _, charge, _, _, _ = position[curr_time][num]
                             i, j, k = \
                                 int(x_big/X_STEP), int(y_big/Y_STEP), int(z_big/Z_STEP)
+                            if num in listen_particles:
+                                plot_data[listen_particles.index(num)] += []
+
                             # print(i, j, k)
 
                         # print('int(x_big/X_STEP)={}/{}, int(y_big/Y_STEP)=={}/{}, int(z_big/Z_STEP)=={}/{}'.format(x_big, X_STEP, y_big, Y_STEP, z_big, Z_STEP))
@@ -271,7 +279,7 @@ def main(prefix):
                 electron_charge_grid, carbon_charge_grid, helium_charge_grid
             # TODO easying
             if FAST_ESTABLISHING_METHOD:
-                if prev_phi == None and next_phi == None:
+                if None == prev_phi and None == next_phi:
                     prev_phi, next_phi, ro = \
                         make_boundary_conditions(phi, n, ecg, ccg, hcg)
                 else:
@@ -318,6 +326,16 @@ def main(prefix):
                     tension = spread_tension((x, y, z), (x_big, y_big, z_big), intensity)
                     for t in range(3):
                         tensions[p][num][t] = tension[t]
+
+            print('Crashing')
+            crashesCarbon, crashesElectron, crashesHelium = [], [], []
+            if time != 0:
+                res = find_collision(time, electron, carbon, helium, max_distances)
+                crashesCarbon, crashesElectron, crashesHelium = res[0]
+                typeI.extend(res[1][0])
+                typeII.extend(res[1][1])
+                typeIII.extend(res[1][2])
+
             # Решение дифуров
             t = np.linspace(0, TIME_STEP, 2)
             curr_time = p_time(time)
@@ -390,106 +408,21 @@ def main(prefix):
             # #         print(h, c)
             # # print('2')
             # Новые столкновения
-            print('Crashing')
-            electron_collision = make_collision_grid(X_DIMENSION_COLLISION, Y_DIMENSION_COLLISION, Z_DIMENSION_COLLISION)
-            helium_collision = make_collision_grid(X_DIMENSION_COLLISION, Y_DIMENSION_COLLISION, Z_DIMENSION_COLLISION)
-            carbon_collision = make_collision_grid(X_DIMENSION_COLLISION, Y_DIMENSION_COLLISION, Z_DIMENSION_COLLISION)
-            electron_collision = distribute_by_grid(electron, electron_collision, curr_time)
-            helium_collision = distribute_by_grid(helium, helium_collision, curr_time)    
-            carbon_collision = distribute_by_grid(carbon, carbon_collision, curr_time)
-            crashesCarbon, crashesElectron, crashesHelium = [], [], []
-            
-            max_distance_x, max_distance_y, max_distance_z = 0.0, 0.0, 0.0
-            for i in range(carbon.shape[1]):
-                if np.abs(carbon[p_time(time)][i][0] - carbon[p_next_time(time)][i][0]) > max_distance_x:
-                    max_distance_x = np.abs(carbon[p_time(time)][i][0] - carbon[p_next_time(time)][i][0])
-                if np.abs(carbon[p_time(time)][i][1] - carbon[p_next_time(time)][i][1]) > max_distance_y:
-                    max_distance_y = np.abs(carbon[p_time(time)][i][1] - carbon[p_next_time(time)][i][1])
-                if np.abs(carbon[p_time(time)][i][2] - carbon[p_next_time(time)][i][2]) > max_distance_z:
-                    max_distance_z = np.abs(carbon[p_time(time)][i][2] - carbon[p_next_time(time)][i][2])
-
-            max_distances += [(max_distance_x, max_distance_y, max_distance_z)]
-            msg = "MAX DIST BY COORDS: \n{}<{}, \n{}<{}, \n{}<{}"
-            print(msg.format(max_distance_x, X_STEP_COLLISION, max_distance_y, Y_STEP_COLLISION, max_distance_z, Z_STEP_COLLISION))
-
-            for i in range(X_DIMENSION_COLLISION):
-                for j in range(Y_DIMENSION_COLLISION):
-                    for k in range(Z_DIMENSION_COLLISION):
-                        for a in carbon_collision[i][j][k]:
-                            xc, yc, zc, radiusc, _, vcx, vcy, vcz = carbon[curr_time][a] 
-                            for b in electron_collision[i][j][k]:
-                                xe, ye, ze, radiuse, _, vex, vey, vez = electron[curr_time][b]
-                                # TODO remove 5*
-                                if np.sqrt((xc-xe)**2 + (yc-ye)**2 + (zc-ze)**2) < 5*(radiusc + radiuse):
-                                    crashesElectron += [tuple(electron[curr_time][b][:])]
-                                    mc = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
-                                    me = ELECTRONS_MASS*radiuse**3 / hi / ELECTRONS_RADIUS**3
-                                    electron[curr_time][b][5] = (2 * mc * vcx + vex*(me - mc))/(mc + me)
-                                    electron[curr_time][b][6] = (2 * mc * vcy + vey*(me - mc))/(mc + me)
-                                    electron[curr_time][b][7] = (2 * mc * vcz + vez*(me - mc))/(mc + me)
-                                    carbon[curr_time][a][5] = (2 * me * vex + vcx*(mc - me))/(mc + me)
-                                    carbon[curr_time][a][6] = (2 * me * vey + vcy*(mc - me))/(mc + me)
-                                    carbon[curr_time][a][7] = (2 * me * vez + vcz*(mc - me))/(mc + me)
-                                    # print('E  ({:.4f}, {:.4f}, {:.4f})\n=> ({:.4f}, {:.4f}, {:.4f})'.format(vex, vey, vez, electron[curr_time][b][5], electron[curr_time][b][6], electron[curr_time][b][7]))
-                                    # print('C  ({:.4f}, {:.4f}, {:.4f})\n=> ({:.4f}, {:.4f}, {:.4f})'.format(vcx, vcy, vcz, carbon[curr_time][a][5], carbon[curr_time][a][6], carbon[curr_time][a][7]))
-                            for b in carbon_collision[i][j][k]:
-                                xc_2, yc_2, zc_2, radiusc_2, _, vcx_2, vcy_2, vcz_2 = carbon[curr_time][b]
-                                # TODO remove 45*
-                                if (a != b) and (np.sqrt((xc-xc_2)**2 + (yc-yc_2)**2 + (zc-zc_2)**2) < (radiusc + radiusc_2)):
-                                    crashesCarbon += [tuple(carbon[curr_time][b][:])]
-                                    m_1 = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
-                                    m_2 = CARBONS_MASS*radiusc_2**3 / hi / CARBONS_RADIUS**3
-                                    v_1 = CARBON_SPEED_DIMENSIONLESS_UNIT*np.sqrt(vcx**2 + vcy**2 + vcz**2)
-                                    v_2 = CARBON_SPEED_DIMENSIONLESS_UNIT*np.sqrt(vcx_2**2 + vcy_2**2 + vcz_2**2)
-                                    e_1 = m_1 * v_1**2 / 2 / CARBONS_NUMBER * AVOGADRO_CONSTANT
-                                    e_2 = m_2 * v_2**2 / 2 / CARBONS_NUMBER * AVOGADRO_CONSTANT
-                                    print('E1 = {} E2 = {} sum = {}'.format(e_1, e_2, e_1+e_2))
-                                    # 348000
-                                    if e_1 + e_2 > 348000:
-                                        typeI += [carbon[curr_time][b][0]]
-                                        continue
-                                        # 614000
-                                    if e_1 + e_2 > 614000:
-                                        typeII += [carbon[curr_time][b][0]]
-                                        continue
-                                        # 839000
-                                    if e_1 + e_2 > 839000:
-                                        typeIII += [carbon[curr_time][b][0]]
-                                        continue
-                                    # e_1 = m_1 * v_1**2 / 2 * AVOGADRO_CONSTANT
-                                    # e_2 = m_2 * v_2**2 / 2 * AVOGADRO_CONSTANT
-                            for b in helium_collision[i][j][k]:
-                                xh, yh, zh, radiush, _, vhx, vhy, vhz = helium[curr_time][b]
-                                # TODO remove 5*
-                                if np.sqrt((xc-xh)**2 + (yc-yh)**2 + (zc-zh)**2) < 5*(radiusc + radiush):
-                                    crashesHelium += [tuple(helium[curr_time][b][:])]
-                                    mc = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
-                                    mh = HELIUMS_MASS*radiush**3 / hi / HELIUMS_RADIUS**3
-                                    helium[curr_time][b][5] = (2 * mc * vcx + vhx*(mh - mc))/(mc + mh)
-                                    helium[curr_time][b][6] = (2 * mc * vcy + vhy*(mh - mc))/(mc + mh)
-                                    helium[curr_time][b][7] = (2 * mc * vcz + vhz*(mh - mc))/(mc + mh)
-                                    carbon[curr_time][a][5] = (2 * mh * vhx + vcx*(mc - mh))/(mc + mh)
-                                    carbon[curr_time][a][6] = (2 * mh * vhy + vcy*(mc - mh))/(mc + mh)
-                                    carbon[curr_time][a][7] = (2 * mh * vhz + vcz*(mc - mh))/(mc + mh)
-                                    # print('H  ({:.4f}, {:.4f}, {:.4f})\n=> ({:.4f}, {:.4f}, {:.4f})'.format(vhx, vhy, vhz, helium[curr_time][b][5], helium[curr_time][b][6], helium[curr_time][b][7]))
-                                    # print('C  ({:.4f}, {:.4f}, {:.4f})\n=> ({:.4f}, {:.4f}, {:.4f})'.format(vcx, vcy, vcz, carbon[curr_time][a][5], carbon[curr_time][a][6], carbon[curr_time][a][7]))
-
-
 
             time += 1
             print('time = {} '.format(time))
 
-            directory = make_dir(prefix, 'graphs')
-            plt.plot([i[0] for i in max_distances], color='red', label='x')
-            plt.plot([0, len(max_distances)], [X_STEP_COLLISION, X_STEP_COLLISION], linestyle=':', lw=6, color='red')
-            plt.plot([i[1] for i in max_distances], color='green', label='y')
-            plt.plot([0, len(max_distances)], [Y_STEP_COLLISION, Y_STEP_COLLISION], linestyle=':', lw=6, color='green')
-            plt.plot([i[2] for i in max_distances], color='blue', label='z')
-            plt.plot([0, len(max_distances)], [Z_STEP_COLLISION, Z_STEP_COLLISION], linestyle=':', lw=6, color='blue')
-            plt.legend()
-            plt.savefig("{}/max_distances".format(directory))
-            plt.clf()
-            plt.close()
+            # directory = make_dir(prefix, 'graphs')
+            # plt.plot([i[0] for i in max_distances], color='red', label='x')
+            # plt.plot([0, len(max_distances)], [X_STEP_COLLISION, X_STEP_COLLISION], linestyle=':', lw=6, color='red')
+            # plt.plot([i[1] for i in max_distances], color='green', label='y')
+            # plt.plot([0, len(max_distances)], [Y_STEP_COLLISION, Y_STEP_COLLISION], linestyle=':', lw=6, color='green')
+            # plt.plot([i[2] for i in max_distances], color='blue', label='z')
+            # plt.plot([0, len(max_distances)], [Z_STEP_COLLISION, Z_STEP_COLLISION], linestyle=':', lw=6, color='blue')
+            # plt.legend()
+            # plt.savefig("{}/max_distances".format(directory))
+            # plt.clf()
+            # plt.close()
             
             
             # make_tracks_plot_file(prefix, carbon, time)
@@ -501,12 +434,21 @@ def main(prefix):
 
             curr_time = p_prev_time(time)
             for p, l in zip(listen_particles, range(len(listen_particles))):
-                plot_data[l] += [carbon[curr_time][p].copy()]
+                plot_data[l][-1] += [carbon[curr_time][p].copy()]
+            msg = 'LENGTH {}'.format(len(plot_data))
+            for q in plot_data:
+                msg += '\n   {}'.format(len(q))
+                for w in q:
+                    msg += '\n     {}'.format(len(w))
+                    # for e in w:
+                    #     msg += '\n       {}'.format(len(e))
+            print(msg)
+
             plt.clf()
             plt.close()
-    except IndexError:
-        print('IndexError')
-        pass
+    # except IndexError:
+    #     print('IndexError')
+    #     pass
     except KeyboardInterrupt:
         print('KeyboardInterrupt')
         pass
@@ -543,6 +485,156 @@ def make_dir(prefix, dir_name):
     except:
         pass
     return path
+
+def find_collision(time, electron, carbon, helium, max_distances):
+    curr_time = p_time(time)
+    prev_time = p_prev_time(time)
+
+    max_distance_x, max_distance_y, max_distance_z = 0.0, 0.0, 0.0
+    for i in range(carbon.shape[1]):
+        value = np.abs(carbon[curr_time][i][0] - carbon[prev_time][i][0])
+        if value > max_distance_x:
+            max_distance_x = value
+        value = np.abs(carbon[curr_time][i][1] - carbon[prev_time][i][1])
+        if value > max_distance_y:
+            max_distance_y = value
+        value = np.abs(carbon[curr_time][i][2] - carbon[prev_time][i][2])
+        if  value > max_distance_z:
+            max_distance_z = value
+
+    max_distances += [(max_distance_x, max_distance_y, max_distance_z)]
+    # (max_distance_x, max_distance_y, max_distance_z)
+    if max_distance_x == 0 or X_DIMENSION_GRID/max_distance_x > 100 or X_DIMENSION_GRID/max_distance_x < 60:
+        X_DIMENSION_COLLISION = 100
+    else:
+        X_DIMENSION_COLLISION = int(X_DIMENSION_GRID/max_distance_x)
+
+    if max_distance_y == 0 or Y_DIMENSION_GRID/max_distance_y > 100 or Y_DIMENSION_GRID/max_distance_y < 60:
+        Y_DIMENSION_COLLISION = 100
+    else:
+        Y_DIMENSION_COLLISION = int(Y_DIMENSION_GRID/max_distance_y)
+    
+    if max_distance_z == 0 or Z_DIMENSION_GRID/max_distance_z > 100 or Z_DIMENSION_GRID/max_distance_z < 60:
+        Z_DIMENSION_COLLISION = 100
+    else:
+        Z_DIMENSION_COLLISION = int(Z_DIMENSION_GRID/max_distance_z)
+    
+    # Z_DIMENSION_COLLISION = int(Y_DIMENSION_GRID/max_distance_y)
+    # X_DIMENSION_COLLISION = int(Z_DIMENSION_GRID/max_distance_z)
+    X_STEP_COLLISION = X_DIMENSION_GRID / X_DIMENSION_COLLISION
+    Y_STEP_COLLISION = Y_DIMENSION_GRID / Y_DIMENSION_COLLISION
+    Z_STEP_COLLISION = Z_DIMENSION_GRID / Z_DIMENSION_COLLISION
+    msg = "MAX DIST BY COORDS: \n{}<{}, \n{}<{}, \n{}<{}"
+    print(msg.format(max_distance_x, X_STEP_COLLISION, max_distance_y, Y_STEP_COLLISION, max_distance_z, Z_STEP_COLLISION))
+    msg = "X_DIMENSION_COLLISION = {}, Y_DIMENSION_COLLISION = {}, Z_DIMENSION_COLLISION = {}"
+    print(msg.format(X_DIMENSION_COLLISION, Y_DIMENSION_COLLISION, Z_DIMENSION_COLLISION))
+    print('MAKE GRID')
+    dims = (X_DIMENSION_COLLISION, Y_DIMENSION_COLLISION, Z_DIMENSION_COLLISION)
+    steps = (X_STEP_COLLISION, Y_STEP_COLLISION, Z_STEP_COLLISION)
+
+    electron_collision = make_collision_grid(X_DIMENSION_COLLISION, Y_DIMENSION_COLLISION, Z_DIMENSION_COLLISION)
+    helium_collision = make_collision_grid(X_DIMENSION_COLLISION, Y_DIMENSION_COLLISION, Z_DIMENSION_COLLISION)
+    carbon_collision = make_collision_grid(X_DIMENSION_COLLISION, Y_DIMENSION_COLLISION, Z_DIMENSION_COLLISION)
+    electron_collision = distribute_by_grid(electron, electron_collision, curr_time, dims, steps)
+    helium_collision = distribute_by_grid(helium, helium_collision, curr_time, dims, steps)
+    carbon_collision = distribute_by_grid(carbon, carbon_collision, curr_time, dims, steps)
+    crashesCarbon, crashesElectron, crashesHelium = [], [], []
+
+    print('CRASH FINDING')
+    count = 0
+    typeI, typeII, typeIII = [], [], []
+    for i in range(X_DIMENSION_COLLISION):
+        for j in range(Y_DIMENSION_COLLISION):
+            for k in range(Z_DIMENSION_COLLISION):
+                for a in carbon_collision[i][j][k]:
+                    xc, yc, zc, radiusc, _, vcx, vcy, vcz = carbon[curr_time][a] 
+                    for b in electron_collision[i][j][k]:
+                        xe, ye, ze, radiuse, _, vex, vey, vez = electron[curr_time][b]
+                        # bp1 = get_component(carbon[p_time(time)][a])
+                        # ep1 = get_component(carbon[p_next_time(time)][a])
+                        # bp2 = get_component(carbon[p_time(time)][b])
+                        # ep2 = get_component(carbon[p_next_time(time)][b])
+                        # TODO remove 5*
+                        # if np.sqrt((xc-xe)**2 + (yc-ye)**2 + (zc-ze)**2) < 5*(radiusc + radiuse):
+                        bp1 = get_component(carbon[curr_time][a])
+                        ep1 = get_component(carbon[prev_time][a])
+                        bp2 = get_component(electron[curr_time][b])
+                        ep2 = get_component(electron[prev_time][b])
+                        vs = check_collision(bp1, ep1, bp2, ep2, radiusc, radiuse, TIME_STEP)
+                        if vs[0]:
+                            crashesElectron += [tuple(electron[curr_time][b][:])]
+                            mc = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
+                            me = ELECTRONS_MASS*radiuse**3 / hi / ELECTRONS_RADIUS**3
+                            electron[curr_time][b][5] = (2 * mc * vcx + vex*(me - mc))/(mc + me)
+                            electron[curr_time][b][6] = (2 * mc * vcy + vey*(me - mc))/(mc + me)
+                            electron[curr_time][b][7] = (2 * mc * vcz + vez*(me - mc))/(mc + me)
+                            carbon[curr_time][a][5] = (2 * me * vex + vcx*(mc - me))/(mc + me)
+                            carbon[curr_time][a][6] = (2 * me * vey + vcy*(mc - me))/(mc + me)
+                            carbon[curr_time][a][7] = (2 * me * vez + vcz*(mc - me))/(mc + me)
+                            # make_crash_track(prefix, bp1, ep1, bp2, ep2, radiusc, radiuse, vs, TIME_STEP, count)
+                            count += 1
+                            # print('E  ({:.4f}, {:.4f}, {:.4f})\n=> ({:.4f}, {:.4f}, {:.4f})'.format(vex, vey, vez, electron[curr_time][b][5], electron[curr_time][b][6], electron[curr_time][b][7]))
+                            # print('C  ({:.4f}, {:.4f}, {:.4f})\n=> ({:.4f}, {:.4f}, {:.4f})'.format(vcx, vcy, vcz, carbon[curr_time][a][5], carbon[curr_time][a][6], carbon[curr_time][a][7]))
+                    for b in helium_collision[i][j][k]:
+                        xh, yh, zh, radiush, _, vhx, vhy, vhz = helium[curr_time][b]
+                        # TODO remove 5*
+                        # if np.sqrt((xc-xh)**2 + (yc-yh)**2 + (zc-zh)**2) < 5*(radiusc + radiush):
+                        bp1 = get_component(carbon[curr_time][a])
+                        ep1 = get_component(carbon[prev_time][a])
+                        bp2 = get_component(helium[curr_time][b])
+                        ep2 = get_component(helium[prev_time][b])
+                        vs = check_collision(bp1, ep1, bp2, ep2, radiusc, radiush, TIME_STEP)
+                        if vs[0]:
+                            crashesHelium += [tuple(helium[curr_time][b][:])]
+                            mc = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
+                            mh = HELIUMS_MASS*radiush**3 / hi / HELIUMS_RADIUS**3
+                            helium[curr_time][b][5] = (2 * mc * vcx + vhx*(mh - mc))/(mc + mh)
+                            helium[curr_time][b][6] = (2 * mc * vcy + vhy*(mh - mc))/(mc + mh)
+                            helium[curr_time][b][7] = (2 * mc * vcz + vhz*(mh - mc))/(mc + mh)
+                            carbon[curr_time][a][5] = (2 * mh * vhx + vcx*(mc - mh))/(mc + mh)
+                            carbon[curr_time][a][6] = (2 * mh * vhy + vcy*(mc - mh))/(mc + mh)
+                            carbon[curr_time][a][7] = (2 * mh * vhz + vcz*(mc - mh))/(mc + mh)
+                            # make_crash_track(prefix, bp1, ep1, bp2, ep2, radiusc, radiush, vs, TIME_STEP, count)
+                            count += 1
+                            # print('H  ({:.4f}, {:.4f}, {:.4f})\n=> ({:.4f}, {:.4f}, {:.4f})'.format(vhx, vhy, vhz, helium[curr_time][b][5], helium[curr_time][b][6], helium[curr_time][b][7]))
+                            # print('C  ({:.4f}, {:.4f}, {:.4f})\n=> ({:.4f}, {:.4f}, {:.4f})'.format(vcx, vcy, vcz, carbon[curr_time][a][5], carbon[curr_time][a][6], carbon[curr_time][a][7]))
+                    for b in carbon_collision[i][j][k]:
+                        xc_2, yc_2, zc_2, radiusc_2, _, vcx_2, vcy_2, vcz_2 = carbon[curr_time][b]
+                        # TODO remove 45*
+                        # if (a != b) and (np.sqrt((xc-xc_2)**2 + (yc-yc_2)**2 + (zc-zc_2)**2) < (radiusc + radiusc_2)):
+                        bp1 = get_component(carbon[curr_time][a])
+                        ep1 = get_component(carbon[prev_time][a])
+                        bp2 = get_component(carbon[curr_time][b])
+                        ep2 = get_component(carbon[prev_time][b])
+                        vs = check_collision(bp1, ep1, bp2, ep2, radiusc, radiusc_2, TIME_STEP)
+                        if (a != b) and vs[0]:
+                            crashesCarbon += [tuple(carbon[curr_time][b][:])]
+                            m_1 = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
+                            m_2 = CARBONS_MASS*radiusc_2**3 / hi / CARBONS_RADIUS**3
+                            v_1 = CARBON_SPEED_DIMENSIONLESS_UNIT*np.sqrt(vcx**2 + vcy**2 + vcz**2)
+                            v_2 = CARBON_SPEED_DIMENSIONLESS_UNIT*np.sqrt(vcx_2**2 + vcy_2**2 + vcz_2**2)
+                            e_1 = m_1 * v_1**2 / 2 / CARBONS_NUMBER * AVOGADRO_CONSTANT
+                            e_2 = m_2 * v_2**2 / 2 / CARBONS_NUMBER * AVOGADRO_CONSTANT
+                            print('E1 = {} E2 = {} sum = {}'.format(e_1, e_2, e_1+e_2))
+                            # 348000
+                            if e_1 + e_2 > 348000:
+                                typeI += [carbon[curr_time][b][0]]
+                                continue
+                                # 614000
+                            if e_1 + e_2 > 614000:
+                                typeII += [carbon[curr_time][b][0]]
+                                continue
+                                # 839000
+                            if e_1 + e_2 > 839000:
+                                typeIII += [carbon[curr_time][b][0]]
+                                continue
+                            # make_crash_tracks(prefix, bp1, ep1, bp2, ep2, radiusc, radiusc_2, vs, TIME_STEP, count)
+                            count += 1
+                            # e_1 = m_1 * v_1**2 / 2 * AVOGADRO_CONSTANT
+                            # e_2 = m_2 * v_2**2 / 2 * AVOGADRO_CONSTANT
+    return ((crashesCarbon, crashesElectron, crashesHelium), (typeI, typeII, typeIII))
+
+
 
 if __name__ == '__main__':
     prefix = make_dir_prefix()
