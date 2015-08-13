@@ -5,6 +5,9 @@ __author__ = 'fedul0x'
 
 # Параметры моделирования
 FAST_ESTABLISHING_METHOD = True
+# Исходный файл для продолжения вычислений
+# COMPUTING_CONTINUATION_FILE = None
+COMPUTING_CONTINUATION_FILE = './picts/picts_cuda_20150811153154/dump_1.pickle'
 # Время моделирования
 MODELING_TIME = 1200
 DATA_IN_MEMORY_TIME = 3
@@ -58,9 +61,9 @@ X_DIMENSION_GRID = 1.0E-3
 Y_DIMENSION_GRID = 1.0E-2
 Z_DIMENSION_GRID = 1.0E-2
 # Число шагов по сетке для крупных частиц
-X_STEP_NUMBER_GRID = 20
-Y_STEP_NUMBER_GRID = 20
-Z_STEP_NUMBER_GRID = 20
+X_STEP_NUMBER_GRID = 100
+Y_STEP_NUMBER_GRID = 100
+Z_STEP_NUMBER_GRID = 100
 # X_STEP_NUMBER_GRID = 10
 # Y_STEP_NUMBER_GRID = 10
 # Z_STEP_NUMBER_GRID = 10

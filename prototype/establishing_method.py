@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-# import pycuda.driver as drv
-# import pycuda.autoinit
-# from pycuda.compiler import SourceModule
+import pycuda.driver as drv
+import pycuda.autoinit
+from pycuda.compiler import SourceModule
 
 from constant import *
 

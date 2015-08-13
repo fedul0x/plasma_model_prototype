@@ -13,13 +13,17 @@ def make_3d_plot_with_speed(ax, position, time, n, plot_type='SPEED', annotated=
     ax.set_zlim3d([0, n[2]])
     grid_dim = (int(n[0]/X_STEP), int(n[1]/Y_STEP), int(n[2]/Z_STEP))
     n = position.shape
-    labels = [[[False for i in range(grid_dim[0])] for j in range(grid_dim[1])] for k in range(grid_dim[2])]
+    labels, flags = None, None
+    if annotated:
+        labels = [[[False for i in range(grid_dim[0])] for j in range(grid_dim[1])] for k in range(grid_dim[2])]
     flags = np.zeros(grid_dim)
     for num in range(n[1]):
         x_big, y_big, z_big = \
             get_component(position[time][num])
         i, j, k = int(x_big/X_STEP), int(y_big/Y_STEP), int(z_big/Z_STEP)
         ax.scatter(x_big, y_big, z_big, color='red')
+        if not annotated:
+            continue
         if (j == k and not flags[0][j][k]):
             flags[0][j][k] = True
             x2, y2, _ = proj3d.proj_transform(x_big, y_big, z_big, ax.get_proj())
@@ -42,13 +46,12 @@ def make_3d_plot_with_speed(ax, position, time, n, plot_type='SPEED', annotated=
     return ax
 
 
-def make_2d_plot_with_tracks(ax, position, time, n):
+def make_2d_plot_with_tracks(ax, position, time, n, thinning=1):
     ax.set_xlim([0, n[0]])
     ax.set_ylim([0, n[1]])
     grid_dim = (int(n[0]/X_STEP), int(n[1]/Y_STEP), int(n[2]/Z_STEP))
     n = position.shape
-    labels = [[[False for i in range(grid_dim[0])] for j in range(grid_dim[1])] for k in range(grid_dim[2])]
-    for num in range(n[1]):
+    for num in range(0, n[1], thinning):
         x_big, y_big = \
             get_component(position[time][num], n=2)
         ax.scatter(x_big, y_big, color='red')
@@ -79,15 +82,16 @@ def make_tracks_plot_file(prefix, position, time):
     plt.close()
 
 
-def make_tracks_plot_file_with_crashes(prefix, position, electron_crashes, helium_crashes, carbon_crashes, time):
+def make_tracks_plot_file_with_crashes(prefix, position, crashes, time, thinning=1):
     directory = make_dir(prefix, 'by_time')
     n = (X_DIMENSION_GRID, Y_DIMENSION_GRID, Z_DIMENSION_GRID)
+    electron_crashes, helium_crashes, carbon_crashes = crashes
     fig = plt.figure()
     ax = fig.add_subplot(211, projection='3d')
     ax2 = fig.add_subplot(212)
     plt.title('time = {} '.format(time))
     ax = make_3d_plot_with_speed(ax, position, p_prev_time(time), n, plot_type='COORD')
-    ax2 = make_2d_plot_with_tracks(ax2, position, p_prev_time(time), n)
+    ax2 = make_2d_plot_with_tracks(ax2, position, p_prev_time(time), n, thinning=thinning)
 
     xes = [num[0] for num in electron_crashes]
     yes = [num[1] for num in electron_crashes]
@@ -106,6 +110,46 @@ def make_tracks_plot_file_with_crashes(prefix, position, electron_crashes, heliu
     zes = [num[2] for num in carbon_crashes]
     if xes:
         ax.scatter(xes, yes, zes, color='black', s=35, marker='*', label='carbon')
+        ax2.scatter(xes, yes, color='black', s=35, marker='*', label='carbon')
+    if len(electron_crashes) + len(helium_crashes) + len(carbon_crashes) > 0:
+        ax2.legend()
+    plt.savefig("{}/carbon_two_coord_{:04d}.png".format(directory, time))
+    plt.clf()
+    plt.close()
+
+    # plt.plot([Mnuc*np.sqrt(position[p_prev_time(time)][i][5]**2 + position[p_prev_time(time)][i][6]**2 + position[p_prev_time(time)][i][7]**2)  for i in range(position.shape[1])])
+    # plt.title('carbon speed from particle number time = {} '.format(time))
+    # plt.savefig("{}/carbon_speed_by_pn_time={:04d}".format(directory, time))
+    # plt.clf()
+    # plt.close()
+
+def make_tracks_plot_file_with_crashes_only_2d(prefix, position, crashes, listen_particles, time, thinning=1):
+    directory = make_dir(prefix, 'by_time')
+    n = (X_DIMENSION_GRID, Y_DIMENSION_GRID, Z_DIMENSION_GRID)
+    electron_crashes, helium_crashes, carbon_crashes = crashes
+    fig = plt.figure()
+    ax2 = fig.add_subplot(111)
+    plt.title('time = {} '.format(time))
+    ax2 = make_2d_plot_with_tracks(ax2, position, p_prev_time(time), n, thinning=thinning)
+    for num in listen_particles:
+        x_big, y_big = \
+            get_component(position[p_prev_time(time)][num], n=2)
+        ax.scatter(x_big, y_big, color='green')
+
+    xes = [num[0] for num in electron_crashes]
+    yes = [num[1] for num in electron_crashes]
+    zes = [num[2] for num in electron_crashes]
+    if xes:
+        ax2.scatter(xes, yes, color='green', s=40, marker='x', label='electron')
+    xes = [num[0] for num in helium_crashes]
+    yes = [num[1] for num in helium_crashes]
+    zes = [num[2] for num in helium_crashes]
+    if xes:
+        ax2.scatter(xes, yes, color='blue', s=35, marker='+', label='helium')
+    xes = [num[0] for num in carbon_crashes]
+    yes = [num[1] for num in carbon_crashes]
+    zes = [num[2] for num in carbon_crashes]
+    if xes:
         ax2.scatter(xes, yes, color='black', s=35, marker='*', label='carbon')
     if len(electron_crashes) + len(helium_crashes) + len(carbon_crashes) > 0:
         ax2.legend()
