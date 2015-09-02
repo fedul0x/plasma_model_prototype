@@ -94,7 +94,9 @@ def check_collision(bp1, ep1, bp2, ep2, r1, r2, time_step):
             t = (t0*x00**2 - t0*x00*x01 - 2*t0*x00*x10 + t0*x00*x11 + t0*x01*x10 + t0*x10**2 - t0*x10*x11 + t0*y00**2 - t0*y00*y01 - 2*t0*y00*y10 + t0*y00*y11 + t0*y01*y10 + t0*y10**2 - t0*y10*y11 + t0*z00**2 - t0*z00*z01 - 2*t0*z00*z10 + t0*z00*z11 + t0*z01*z10 + t0*z10**2 - t0*z10*z11 - sqrt(d))/(d2)
             # print(d, t0)
             if t >= 0 and t <= t0:
-                return (t0, None)
+                # print('PY DDDDD {}'.format(d))
+                # print('PY DDDDD22222 {}'.format(d2))
+                return (t, None)
     
     return (None, None)
 

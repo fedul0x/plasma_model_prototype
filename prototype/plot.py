@@ -134,11 +134,14 @@ def make_tracks_plot_file_with_crashes_only_2d(prefix, position, crashes, listen
     for num in listen_particles:
         x_big, y_big = \
             get_component(position[p_prev_time(time)][num], n=2)
-        ax.scatter(x_big, y_big, color='green')
+        ax2.scatter(x_big, y_big, color='green')
 
     xes = [num[0] for num in electron_crashes]
+    # xes = [num[0] for num in carbon_crashes]
     yes = [num[1] for num in electron_crashes]
+    # yes = [num[1] for num in carbon_crashes]
     zes = [num[2] for num in electron_crashes]
+    # zes = [num[2] for num in carbon_crashes]
     if xes:
         ax2.scatter(xes, yes, color='green', s=40, marker='x', label='electron')
     xes = [num[0] for num in helium_crashes]
@@ -274,57 +277,55 @@ def make_collision_distribution_plot_file(prefix, typeI, typeII, typeIII):
 
 def make_speed_position_plot_file(prefix, plot_data, particles, time):
     directory = make_dir(prefix, 'graphs')
-    # colors = ['red', 'green', 'blue']
-    print(plot_data)
-    # assert(False)
     for pds, p in zip(plot_data, particles):
         fig, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
         for pd in pds:
-            print('LENGTH OF PDS = {}'.format(len(pds)))
-            ax1.plot([i for i in range(len(pd))], [i[0] for i in pd])  #, color=colors[p])
+            ax1.plot([i[0] for i in pd])
+            ax2.plot([i[1] for i in pd])
+            ax3.plot([i[2] for i in pd])
         ax1.set_title("x from time particle num={}".format(p))
-        for pd in pds:
-            ax2.plot( [i[1] for i in pd])#, color=colors[p])
         ax2.set_title("y from time particle num={}".format(p))
-        for pd in pds:
-            ax3.plot( [i[2] for i in pd])#, color=colors[p])
         ax3.set_title("z from time particle num={}".format(p))
-        plt.savefig("{}/positions_50_50_pn={}".format(directory, p))
+        plt.savefig("{}/positions_from_time_pn={}".format(directory, p))
         plt.clf()
 
         fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True)
-        ax1.plot([i[0] for i in pd], [i[5]*Mnuc if np.abs(i[5]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
+        for pd in pds:
+            ax1.plot([i[0] for i in pd], [i[5]*Mnuc if np.abs(i[5]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
+            ax2.plot([i[0] for i in pd], [i[6]*Mnuc if np.abs(i[6]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
+            ax3.plot([i[0] for i in pd], [i[7]*Mnuc if np.abs(i[7]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
+            ax4.plot([i[0] for i in pd], [np.sqrt(i[5]**2 + i[6]**2 + i[7]**2)*Mnuc for i in pd])#, color=colors[p])
         ax1.set_title("v_x from x particle num={}".format(p))
-        ax2.plot([i[0] for i in pd], [i[6]*Mnuc if np.abs(i[6]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
         ax2.set_title("v_y from x particle num={}".format(p))
-        ax3.plot([i[0] for i in pd], [i[7]*Mnuc if np.abs(i[7]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
         ax3.set_title("v_z from x particle num={}".format(p))
-        ax4.plot([i[0] for i in pd], [np.sqrt(i[5]**2 + i[6]**2 + i[7]**2)*Mnuc for i in pd])#, color=colors[p])
         ax4.set_title("|v| from x particle num={}".format(p))
-        plt.savefig("{}/speeds_50_50_pn={}.png".format(directory, p))
+        plt.savefig("{}/speeds_from_x_pn={}.png".format(directory, p))
         plt.clf()
 
         fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex=True)
-        ax1.plot([i for i in range(len(pd))], [i[5]*Mnuc if np.abs(i[5]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
+        for pd in pds:
+            ax1.plot([i for i in range(len(pd))], [i[5]*Mnuc if np.abs(i[5]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
+            ax2.plot([i for i in range(len(pd))], [i[6]*Mnuc if np.abs(i[6]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
+            ax3.plot([i for i in range(len(pd))], [i[7]*Mnuc if np.abs(i[7]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
+            ax4.plot([i for i in range(len(pd))], [np.sqrt(i[5]**2 + i[6]**2 + i[7]**2)*Mnuc for i in pd])#, color=colors[p])
         ax1.set_title("v_x from time particle num={}".format(p))
-        ax2.plot([i for i in range(len(pd))], [i[6]*Mnuc if np.abs(i[6]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
         ax2.set_title("v_y from time particle num={}".format(p))
-        ax3.plot([i for i in range(len(pd))], [i[7]*Mnuc if np.abs(i[7]*Mnuc)>1E-30 else 0 for i in pd])#, color=colors[p])
         ax3.set_title("v_z from time particle num={}".format(p))
-        ax4.plot([i for i in range(len(pd))], [np.sqrt(i[5]**2 + i[6]**2 + i[7]**2)*Mnuc for i in pd])#, color=colors[p])
         ax4.set_title("|v| from time particle num={}".format(p))
         plt.savefig("{}/speeds_50_50_from_time_pn={}.png".format(directory, p))
         plt.clf()
 
         fig, (ax1, ax2) = plt.subplots(2, sharex=True)
-        ax1.plot([i[0] for i in pd], [i[1] for i in pd])
+        for pd in pds:
+            ax1.plot([i[0] for i in pd], [i[1] for i in pd])
+            ax2.plot([i[0] for i in pd], [i[2] for i in pd])
         ax1.set_title("y from x particle num={}".format(p))
-        ax2.plot([i[0] for i in pd], [i[2] for i in pd])#, color=colors[p])
         ax2.set_title("z from x particle num={}".format(p))
         plt.savefig("{}/positions(position)_50_50_pn={}".format(directory, p))
 
         fig, (ax1) = plt.subplots(1)
-        ax1.plot([i[1] for i in pd], [i[2] for i in pd])  #, color=colors[p])
+        for pd in pds:
+            ax1.plot([i[1] for i in pd], [i[2] for i in pd])
         ax1.set_title("z from y particle num={}".format(p))
         plt.savefig("{}/positions(position)_2_50_50_pn={}".format(directory, p))
         plt.clf()

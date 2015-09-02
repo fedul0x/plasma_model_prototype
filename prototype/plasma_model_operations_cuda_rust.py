@@ -9,6 +9,7 @@ from scipy.integrate import odeint
 import pickle
 import numpy as np
 from numpy.random import rand
+from ctypes import *
 
 from constant import *
 from plot import *
@@ -347,14 +348,52 @@ def main(prefix):
             start = time.time()
             crashesCarbon, crashesElectron, crashesHelium = [], [], []
             if absolute_time != 0:
+                print('PYTHON PART')
                 res = find_collision(absolute_time, electron, carbon, helium, max_distances)
                 crashesCarbon, crashesElectron, crashesHelium = res[0]
                 typeI.extend(res[1][0])
                 typeII.extend(res[1][1])
                 typeIII.extend(res[1][2])
+                print('RUST PART')
+                import ctypes
+                curr_time = p_time(absolute_time)
+                prev_time = p_prev_time(absolute_time)
+                length = carbon.shape[1]
+                prev_data_x = (ctypes.c_float * length) \
+                    (*[carbon[prev_time][num][0] for num in range(length)])
+                prev_data_y = (ctypes.c_float * length)\
+                    (*[carbon[prev_time][num][1] for num in range(length)])
+                prev_data_z = (ctypes.c_float * length)\
+                    (*[carbon[prev_time][num][2] for num in range(length)])
+                next_data_x = (ctypes.c_float * length)\
+                    (*[carbon[curr_time][num][0] for num in range(length)])
+                next_data_y = (ctypes.c_float * length)\
+                    (*[carbon[curr_time][num][1] for num in range(length)])
+                next_data_z = (ctypes.c_float * length)\
+                    (*[carbon[curr_time][num][2] for num in range(length)])
+                # print([carbon[prev_time][num][0] for num in range(length)])
+                # print([carbon[prev_time][num][1] for num in range(length)])
+                # print([carbon[prev_time][num][2] for num in range(length)])
+                # lib = ctypes.cdll.LoadLibrary("./target/debug/libcollfinder.so")
+                class Slice(Structure):
+                    _fields_ = [("ptr", POINTER(c_int32)), ("len", c_uint64)]
+
+                lib = ctypes.cdll.LoadLibrary("/home/fedul0x/Dropbox/projects/rust/plasma_test_2/target/debug/libcollfinder.so")
+                ft = ctypes.POINTER(ctypes.c_float)
+                lib.my_func.argtypes = (ft, ft, ft, ft, ft, ft, ctypes.c_size_t, ctypes.c_float)
+                lib.my_func.restype = Slice
+                v = lib.my_func(prev_data_x, prev_data_y, prev_data_z, next_data_x, next_data_y, next_data_z, length, TIME_STEP)
+                data = [v.ptr[i] for i in range(v.len)]
+
+                crashesElectron, crashesHelium = [tuple(carbon[curr_time][i][:]) for i in data], []
+
+                # c_array = (ctypes.c_float * len(list_to_sum))(*list_to_sum)
+                # print (lib.my_func(prev_data_x, prev_data_y, prev_data_z, next_data_x, next_data_y, next_data_z, length, TIME_STEP))
+
+
+
             end = time.time()
             print('Crash finding elapsed time = {}'.format(end-start))
-            
             # Решение дифуров
             start = time.time()
             t = np.linspace(0, TIME_STEP, 2)
@@ -381,10 +420,10 @@ def main(prefix):
                     while fff:
                         res = odeint(f, y0, t)
                         fff = (res[-1][0] == np.NaN) or (res[-1][1] == np.NaN)
-                        print('Dimnesion {}'.format(dim))
-                        print('        v = {}, r = {}, E = {}'.format(v, r, E))
-                        print('Result: v = {}, r = {}'.format(res[-1][1], res[-1][0]))
-                        print('{}\n{}\n'.format(res[0], res[1]))
+                        # print('Dimnesion {}'.format(dim))
+                        # print('        v = {}, r = {}, E = {}'.format(v, r, E))
+                        # print('Result: v = {}, r = {}'.format(res[-1][1], res[-1][0]))
+                        # print('{}\n{}\n'.format(res[0], res[1]))
                     
                     # if num == 0:
                     #     print(res)
@@ -417,6 +456,7 @@ def main(prefix):
             end = time.time()
             print('Dump saving elapsed time = {}'.format(end-start))
 
+            # print('RADUISUSUISS {}'.format(carbon[curr_time][0][3]))
             start = time.time()
             # directory = make_dir(prefix, 'graphs')
             # plt.plot([i[0] for i in max_distances], color='red', label='x')
@@ -445,14 +485,14 @@ def main(prefix):
             curr_time = p_prev_time(absolute_time)
             for p, l in zip(listen_particles, range(len(listen_particles))):
                 plot_data[l][-1] += [carbon[curr_time][p].copy()]
-            msg = 'LENGTH {}'.format(len(plot_data))
-            for q in plot_data:
-                msg += '\n   {}'.format(len(q))
-                for w in q:
-                    msg += '\n     {}'.format(len(w))
-                    for e in w:
-                        msg += '\n       {}'.format(len(e))
-            print(msg)
+            # msg = 'LENGTH {}'.format(len(plot_data))
+            # for q in plot_data:
+            #     msg += '\n   {}'.format(len(q))
+            #     for w in q:
+            #         msg += '\n     {}'.format(len(w))
+            #         for e in w:
+            #             msg += '\n       {}'.format(len(e))
+            # print(msg)
 
             plt.clf()
             plt.close()
@@ -627,6 +667,8 @@ def find_collision(absolute_time, electron, carbon, helium, max_distances):
                             v_2 = CARBON_SPEED_DIMENSIONLESS_UNIT*np.sqrt(vcx_2**2 + vcy_2**2 + vcz_2**2)
                             e_1 = m_1 * v_1**2 / 2 / CARBONS_NUMBER * AVOGADRO_CONSTANT
                             e_2 = m_2 * v_2**2 / 2 / CARBONS_NUMBER * AVOGADRO_CONSTANT
+                            print('CRASHES PY {}'.format(a))
+                            print('CRASHES PY {}'.format(b))
                             # print('E1 = {} E2 = {} sum = {}'.format(e_1, e_2, e_1+e_2))
                             # 348000
                             if e_1 + e_2 > 348000:
