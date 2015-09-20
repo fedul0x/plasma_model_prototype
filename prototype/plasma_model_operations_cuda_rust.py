@@ -33,7 +33,7 @@ def p_prev_time(absolute_time):
 def f(y, t):
     delta, Z, epsilonC = 1.0, 1.0, 1.0
     r, v, E = y[0], y[1], y[2]
-    f = [np.sqrt(delta)*v, np.sqrt(delta)*Z/2/epsilonC*E]
+    f = [np.sqrt(delta)*v, np.sqrt(delta)*Z/2/epsilonC*E, 0]
     return f
 
 
@@ -348,12 +348,12 @@ def main(prefix):
             start = time.time()
             crashesCarbon, crashesElectron, crashesHelium = [], [], []
             if absolute_time != 0:
-                print('PYTHON PART')
-                res = find_collision(absolute_time, electron, carbon, helium, max_distances)
-                crashesCarbon, crashesElectron, crashesHelium = res[0]
-                typeI.extend(res[1][0])
-                typeII.extend(res[1][1])
-                typeIII.extend(res[1][2])
+                # print('PYTHON PART')
+                # res = find_collision(absolute_time, electron, carbon, helium, max_distances)
+                # crashesCarbon, crashesElectron, crashesHelium = res[0]
+                # typeI.extend(res[1][0])
+                # typeII.extend(res[1][1])
+                # typeIII.extend(res[1][2])
                 print('RUST PART')
                 import ctypes
                 curr_time = p_time(absolute_time)
