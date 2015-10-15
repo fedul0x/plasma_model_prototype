@@ -32,7 +32,7 @@ maxwell_randomizer = MWranomizer()
 
 
 # size = 100000
-size = 10
+size = 1
 
 start_time = time.time()
 

@@ -165,9 +165,9 @@ def main(prefix):
     # TODO оптимизировать получения случвела Максвелла
     # print('Particle distribution')
     start = time.time()
-    electron_randomizer = MWranomizer2(n=1, m=ELECTRONS_MASS, T=TEMPERATURE)
-    carbon_randomizer = MWranomizer2(n=1, m=CARBONS_MASS, T=TEMPERATURE)
-    helium_randomizer = MWranomizer2(n=1, m=HELIUMS_MASS, T=HELIUMS_TEMPERATURE)
+    electron_randomizer = MWranomizer(n=1, m=ELECTRONS_MASS, T=TEMPERATURE)
+    carbon_randomizer = MWranomizer(n=1, m=CARBONS_MASS, T=TEMPERATURE)
+    helium_randomizer = MWranomizer(n=1, m=HELIUMS_MASS, T=HELIUMS_TEMPERATURE)
     csdu, esdu, hsdu = CARBON_SPEED_DIMENSIONLESS_UNIT, \
         ELECTRON_SPEED_DIMENSIONLESS_UNIT, HELLIUM_SPEED_DIMENSIONLESS_UNIT
     big_carbon_radius = \
@@ -396,7 +396,7 @@ def main(prefix):
             print('Crash finding elapsed time = {}'.format(end-start))
             # Решение дифуров
             start = time.time()
-            t = np.linspace(0, TIME_STEP, 2)
+            t = np.linspace(0, TIME_STEP / Mt, 2)
             curr_time = p_time(absolute_time)
             for num in range(carbon.shape[1]):
                 x_big, y_big, z_big = \
