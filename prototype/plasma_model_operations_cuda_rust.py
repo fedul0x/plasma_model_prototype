@@ -447,6 +447,17 @@ def main(prefix):
             end = time.time()
             print('Differential equations solution elapsed time = {}'.format(end-start))
 
+            # print("t, Vx, Vy, Vz, rx, ry, rz, Ex, Ey, Ez")
+            # time, i, x, y, z, radius, charge, speedx, speedy, speedz
+            # t, Vx, Vy, Vz, rx, ry, rz, Ex, Ey, Ez
+            log_file = open(prefix + '/listen_particles.log', 'a')
+            for k, p in zip(range(len(listen_particles)), listen_particles):
+                log_file.write("{}: {} {} {} {} {} {} {} {} {} {}\n".format(k+1, absolute_time*TIME_STEP,
+                    carbon[curr_time][p][5]*Mnuc, carbon[curr_time][p][6]*Mnuc, carbon[curr_time][p][7]*Mnuc, 
+                    carbon[curr_time][p][0], carbon[curr_time][p][1], carbon[curr_time][p][2], 
+                    carbon_tension[p][0], carbon_tension[p][1], carbon_tension[p][2]))
+            log_file.close()
+
             absolute_time += 1
             print('absolute time = {} '.format(absolute_time))
             start = time.time()
