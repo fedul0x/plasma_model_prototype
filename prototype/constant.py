@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import os.path
-from functools import reduce
 
 __author__ = 'fedul0x'
 
@@ -79,22 +78,22 @@ Y_DIMENSION_GRID = 1.0E-2
 Z_DIMENSION_GRID = 1.0E-2
 
 # Число шагов по сетке для крупных частиц
-X_STEP_NUMBER_GRID = 50
-Y_STEP_NUMBER_GRID = 50
-Z_STEP_NUMBER_GRID = 50
+X_STEP_NUMBER_GRID = 100
+Y_STEP_NUMBER_GRID = 100
+Z_STEP_NUMBER_GRID = 100
 
 # Шаг по сетке
 X_STEP = X_DIMENSION_GRID / X_STEP_NUMBER_GRID
 Y_STEP = Y_DIMENSION_GRID / Y_STEP_NUMBER_GRID
 Z_STEP = Z_DIMENSION_GRID / Z_STEP_NUMBER_GRID
 STEPS = (X_STEP, Y_STEP, Z_STEP)
+
 # Начальное значение времени метода установления
 _FAKE_TIME_STEP = 1.75E-9
 while (_FAKE_TIME_STEP/X_STEP**2 + _FAKE_TIME_STEP/Y_STEP**2 + _FAKE_TIME_STEP/Z_STEP**2 > 0.5):
     _FAKE_TIME_STEP /= 2
 
 FAKE_TIME_STEP = 1.75E-9
-# while (reduce(lambda sum, step: sum + FAKE_TIME_STEP/step**2, [0]+list(STEPS)) > 0.5):
 while (sum(map(lambda step: FAKE_TIME_STEP/step**2, STEPS)) > 0.5):
     FAKE_TIME_STEP /= 2
 assert(FAKE_TIME_STEP == _FAKE_TIME_STEP)
@@ -150,4 +149,4 @@ Mt = 1
 Mt = 5.211008445E-12
 
 # Сплоченность мелких частиц внутри крупной
-hi = 0.7  #0..1
+hi = 0.7  # 0..1
