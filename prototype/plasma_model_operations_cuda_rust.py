@@ -9,7 +9,6 @@ from scipy.integrate import odeint
 import pickle
 import numpy as np
 from numpy.random import rand
-from ctypes import *
 
 from constant import *
 from plot import *
@@ -348,47 +347,57 @@ def main(prefix):
             start = time.time()
             crashesCarbon, crashesElectron, crashesHelium = [], [], []
             if absolute_time != 0:
-                # print('PYTHON PART')
-                # res = find_collision(absolute_time, electron, carbon, helium, max_distances)
-                # crashesCarbon, crashesElectron, crashesHelium = res[0]
-                # typeI.extend(res[1][0])
-                # typeII.extend(res[1][1])
-                # typeIII.extend(res[1][2])
-                print('RUST PART')
-                import ctypes
                 curr_time = p_time(absolute_time)
                 prev_time = p_prev_time(absolute_time)
-                length = carbon.shape[1]
-                prev_data_x = (ctypes.c_float * length) \
-                    (*[carbon[prev_time][num][0] for num in range(length)])
-                prev_data_y = (ctypes.c_float * length)\
-                    (*[carbon[prev_time][num][1] for num in range(length)])
-                prev_data_z = (ctypes.c_float * length)\
-                    (*[carbon[prev_time][num][2] for num in range(length)])
-                next_data_x = (ctypes.c_float * length)\
-                    (*[carbon[curr_time][num][0] for num in range(length)])
-                next_data_y = (ctypes.c_float * length)\
-                    (*[carbon[curr_time][num][1] for num in range(length)])
-                next_data_z = (ctypes.c_float * length)\
-                    (*[carbon[curr_time][num][2] for num in range(length)])
-                # print([carbon[prev_time][num][0] for num in range(length)])
-                # print([carbon[prev_time][num][1] for num in range(length)])
-                # print([carbon[prev_time][num][2] for num in range(length)])
-                # lib = ctypes.cdll.LoadLibrary("./target/debug/libcollfinder.so")
-                class Slice(Structure):
-                    _fields_ = [("ptr", POINTER(c_int32)), ("len", c_uint64)]
+                # for iii in range(carbon.shape[1]):
+                #     print("{} {} {} {} {} {} {} ".format(carbon[curr_time][iii][3], carbon[curr_time][iii][0], carbon[curr_time][iii][1], carbon[curr_time][iii][2], carbon[prev_time][iii][0], carbon[prev_time][iii][1], carbon[prev_time][iii][2]))
+                crashesCarbon   = find_collision_rust(carbon, carbon, curr_time, prev_time)
+                crashesElectron = find_collision_rust(carbon, electron, curr_time, prev_time)
+                crashesHelium   = find_collision_rust(carbon, helium, curr_time, prev_time)
 
-                lib = ctypes.cdll.LoadLibrary("/home/fedul0x/Dropbox/projects/rust/plasma_test_2/target/debug/libcollfinder.so")
-                ft = ctypes.POINTER(ctypes.c_float)
-                lib.my_func.argtypes = (ft, ft, ft, ft, ft, ft, ctypes.c_size_t, ctypes.c_float)
-                lib.my_func.restype = Slice
-                v = lib.my_func(prev_data_x, prev_data_y, prev_data_z, next_data_x, next_data_y, next_data_z, length, TIME_STEP)
-                data = [v.ptr[i] for i in range(v.len)]
 
-                crashesElectron, crashesHelium = [tuple(carbon[curr_time][i][:]) for i in data], []
+                
+                # # print('PYTHON PART')
+                # # res = find_collision(absolute_time, electron, carbon, helium, max_distances)
+                # # crashesCarbon, crashesElectron, crashesHelium = res[0]
+                # # typeI.extend(res[1][0])
+                # # typeII.extend(res[1][1])
+                # # typeIII.extend(res[1][2])
+                # print('RUST PART')
+                # import ctypes
+                # curr_time = p_time(absolute_time)
+                # prev_time = p_prev_time(absolute_time)
+                # length = carbon.shape[1]
+                # prev_data_x = (ctypes.c_float * length) \
+                #     (*[carbon[prev_time][num][0] for num in range(length)])
+                # prev_data_y = (ctypes.c_float * length)\
+                #     (*[carbon[prev_time][num][1] for num in range(length)])
+                # prev_data_z = (ctypes.c_float * length)\
+                #     (*[carbon[prev_time][num][2] for num in range(length)])
+                # next_data_x = (ctypes.c_float * length)\
+                #     (*[carbon[curr_time][num][0] for num in range(length)])
+                # next_data_y = (ctypes.c_float * length)\
+                #     (*[carbon[curr_time][num][1] for num in range(length)])
+                # next_data_z = (ctypes.c_float * length)\
+                #     (*[carbon[curr_time][num][2] for num in range(length)])
+                # # print([carbon[prev_time][num][0] for num in range(length)])
+                # # print([carbon[prev_time][num][1] for num in range(length)])
+                # # print([carbon[prev_time][num][2] for num in range(length)])
+                # # lib = ctypes.cdll.LoadLibrary("./target/debug/libcollfinder.so")
+                # class Slice(Structure):
+                #     _fields_ = [("ptr", POINTER(c_int32)), ("len", c_uint64)]
 
-                # c_array = (ctypes.c_float * len(list_to_sum))(*list_to_sum)
-                # print (lib.my_func(prev_data_x, prev_data_y, prev_data_z, next_data_x, next_data_y, next_data_z, length, TIME_STEP))
+                # lib = ctypes.cdll.LoadLibrary("/home/fedul0x/Dropbox/projects/rust/plasma_test_2/target/debug/libcollfinder.so")
+                # ft = ctypes.POINTER(ctypes.c_float)
+                # lib.my_func.argtypes = (ft, ft, ft, ft, ft, ft, ctypes.c_size_t, ctypes.c_float)
+                # lib.my_func.restype = Slice
+                # v = lib.my_func(prev_data_x, prev_data_y, prev_data_z, next_data_x, next_data_y, next_data_z, length, TIME_STEP)
+                # data = [v.ptr[i] for i in range(v.len)]
+
+                # crashesElectron, crashesHelium = [tuple(carbon[curr_time][i][:]) for i in data], []
+
+                # # c_array = (ctypes.c_float * len(list_to_sum))(*list_to_sum)
+                # # print (lib.my_func(prev_data_x, prev_data_y, prev_data_z, next_data_x, next_data_y, next_data_z, length, TIME_STEP))
 
 
 

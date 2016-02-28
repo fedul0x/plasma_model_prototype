@@ -8,7 +8,8 @@ __author__ = 'fedul0x'
 FAST_ESTABLISHING_METHOD = True
 
 # Исходный файл для продолжения вычислений
-COMPUTING_CONTINUATION_FILE = './picts/picts_cuda_20150914121339/dump_0.pickle'
+# COMPUTING_CONTINUATION_FILE = './picts/picts_cuda_20151125202950/dump_1.pickle'
+COMPUTING_CONTINUATION_FILE = './picts/picts_cuda_20151126181953/dump_1.pickle'
 COMPUTING_CONTINUATION_FILE = COMPUTING_CONTINUATION_FILE \
     if os.path.exists(COMPUTING_CONTINUATION_FILE) else None
 

@@ -3,6 +3,7 @@
 import numpy as np
 from time import time as timer
 from math import *
+from ctypes import *
 
 from constant import *
 
@@ -15,6 +16,54 @@ __author__ = 'fedul0x'
 # X_STEP_COLLISION = X_DIMENSION_GRID / X_DIMENSION_COLLISION
 # Y_STEP_COLLISION = Y_DIMENSION_GRID / Y_DIMENSION_COLLISION
 # Z_STEP_COLLISION = Z_DIMENSION_GRID / Z_DIMENSION_COLLISION
+
+def find_collision_rust(parttype1, parttype2, currtime, prevtime):
+    # curr_time = p_time(absolute_time)
+    # prev_time = p_prev_time(absolute_time)
+    curr_time = currtime
+    prev_time = prevtime
+    radius_1 = parttype1[currtime][0][3]
+    radius_2 = parttype2[currtime][0][3]
+    length_1 = parttype1.shape[1]
+    prev_data_1_x =(c_float * length_1)\
+        (*[parttype1[prev_time][num][0] for num in range(length_1)])
+    prev_data_1_y =(c_float * length_1)\
+        (*[parttype1[prev_time][num][1] for num in range(length_1)])
+    prev_data_1_z = (c_float*length_1)\
+        (*[parttype1[prev_time][num][2] for num in range(length_1)])
+    next_data_1_x = (c_float * length_1)\
+        (*[parttype1[curr_time][num][0] for num in range(length_1)])
+    next_data_1_y = (c_float * length_1)\
+        (*[parttype1[curr_time][num][1] for num in range(length_1)])
+    next_data_1_z = (c_float * length_1)\
+        (*[parttype1[curr_time][num][2] for num in range(length_1)])
+
+    length_2 = parttype2.shape[1]
+    prev_data_2_x = (c_float * length_2)\
+        (*[parttype2[prev_time][num][0] for num in range(length_2)])
+    prev_data_2_y = (c_float * length_2)\
+        (*[parttype2[prev_time][num][1] for num in range(length_2)])
+    prev_data_2_z = (c_float * length_2)\
+        (*[parttype2[prev_time][num][2] for num in range(length_2)])
+    next_data_2_x = (c_float * length_2)\
+        (*[parttype2[curr_time][num][0] for num in range(length_2)])
+    next_data_2_y = (c_float * length_2)\
+        (*[parttype2[curr_time][num][1] for num in range(length_2)])
+    next_data_2_z = (c_float * length_2)\
+        (*[parttype2[curr_time][num][2] for num in range(length_2)])
+
+    class Slice(Structure):
+        _fields_ = [("ptr", POINTER(c_int32)), ("len", c_uint64)]
+
+    lib = cdll.LoadLibrary("/home/fedul0x/Dropbox/projects/rust/plasma_test_2/target/debug/libcollfinder.so")
+    ft = POINTER(c_float)
+    lib.my_func.argtypes =\
+        (ft, ft, ft, ft, ft, ft, c_size_t, c_double, ft, ft, ft, ft, ft, ft, c_size_t, c_double, c_double)
+    lib.my_func.restype = Slice
+    v = lib.my_func(prev_data_1_x, prev_data_1_y, prev_data_1_z, next_data_1_x, next_data_1_y, next_data_1_z, length_1, radius_1, prev_data_2_x, prev_data_2_y, prev_data_2_z, next_data_2_x, next_data_2_y, next_data_2_z, length_2, radius_2, TIME_STEP)
+    data = [(v.ptr[i+0], v.ptr[i+1]) for i in range(0, v.len, 2)]
+
+    return [tuple(parttype2[curr_time][i[1]][:]) for i in data]
 
 def make_collision_grid(x_dim, y_dim, z_dim):
     result = []
