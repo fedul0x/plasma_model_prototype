@@ -4,18 +4,20 @@ import os.path
 
 __author__ = 'fedul0x'
 
-# Параметры моделирования
+# Использовать ускоренный расчет эквипотенциальных поверхностей 
+# (на основе предыдущих значений)
 FAST_ESTABLISHING_METHOD = True
 
-# Исходный файл для продолжения вычислений
-# COMPUTING_CONTINUATION_FILE = './picts/picts_cuda_20151125202950/dump_1.pickle'
-COMPUTING_CONTINUATION_FILE = None
-COMPUTING_CONTINUATION_FILE = COMPUTING_CONTINUATION_FILE \
-    and os.path.exists(COMPUTING_CONTINUATION_FILE) 
+# Дамп с начальным распределением всех частиц, указать None при отсутсвии оного
+DUMP_FILE = None # './picts/picts_cuda_20160321192524/dump.pickle'
+DUMP_FILE = DUMP_FILE if DUMP_FILE and os.path.exists(DUMP_FILE) \
+    else False
 
-# Время моделирования
+# Колчиство тактов моделирования
 MODELING_TIME = 1200
+# Длинна истории
 DATA_IN_MEMORY_TIME = 3
+# Количество отрывающихся слоев углерода
 CARBON_LAYERS_NUMBER = 3
 
 # Электростатическая постоянная (epsilon0)
@@ -73,9 +75,9 @@ Y_DIMENSION_GRID = 1.0E-2
 Z_DIMENSION_GRID = 1.0E-2
 
 # Число шагов по сетке для крупных частиц
-X_STEP_NUMBER_GRID = 10
-Y_STEP_NUMBER_GRID = 10
-Z_STEP_NUMBER_GRID = 10
+X_STEP_NUMBER_GRID = 100
+Y_STEP_NUMBER_GRID = 100
+Z_STEP_NUMBER_GRID = 100
 
 # Шаг по сетке
 X_STEP = X_DIMENSION_GRID / X_STEP_NUMBER_GRID

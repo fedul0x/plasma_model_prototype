@@ -180,7 +180,7 @@ def main(prefix):
     big_helium_radius = \
         (hi * HELIUMS_RADIUS ** 3 * HELIUMS_NUMBER) ** (1.0 / 3.0)
     big_helium_charge = HELIUMS_CHARGE * HELIUMS_NUMBER
-    if not COMPUTING_CONTINUATION_FILE:
+    if not DUMP_FILE:
         # Распределение углерода
         for _ in range(CARBON_LAYERS_NUMBER):
             for y, j in zip(y_range[:-1], range(y_range.shape[0] - 1)):
@@ -212,19 +212,21 @@ def main(prefix):
                     for v, l in zip([x_big, y_big, z_big, big_helium_radius, big_helium_charge, x_speed, y_speed, z_speed], range(helium.shape[2])):
                         helium[absolute_time][num][l] = v
                     num += 1
+        # Make dump for future usage 
+        with open(prefix + '/dump.pickle', 'wb') as dump_file:
+            pickle.dump((carbon, electron, helium), dump_file)
+    else:
+        with open(DUMP_FILE, 'rb') as dump_file:
+            carbon, electron, helium = pickle.load(dump_file)
 
     # MODELING CYCLE BEGIN
-    num = 0  # номер частицы
-    absolute_time = 0  # абсолютная позиция по временной шкале
-    crashesElectron = []
-    crashesHelium = []
+    num = 0  # number of particle
+    absolute_time = 0  # absolute time
     prev_phi, next_phi = [], []
     # Для итоговых графиков
-    typeI, typeII, typeIII = [], [], []
-    max_distances = []
-    if COMPUTING_CONTINUATION_FILE:
-        with open(COMPUTING_CONTINUATION_FILE, 'rb') as dump_file:
-            absolute_time, carbon, electron, helium, prev_phi, next_phi, crashesCarbon, crashesElectron, crashesHelium, typeI, typeII, typeIII, begin_speed_distribution_data, end_speed_distribution_data, listen_particles, plot_data = pickle.load(dump_file)
+    # if DUMP_FILE:
+    #     with open(DUMP_FILE, 'rb') as dump_file:
+    #         absolute_time, carbon, electron, helium, prev_phi, next_phi, crashesCarbon, crashesElectron, crashesHelium, typeI, typeII, typeIII, begin_speed_distribution_data, end_speed_distribution_data, listen_particles, plot_data = pickle.load(dump_file)
     end = time.time()
     print('Particle distribution elapsed time = {}'.format(end-start))
     try:
