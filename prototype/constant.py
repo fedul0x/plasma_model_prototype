@@ -9,7 +9,8 @@ __author__ = 'fedul0x'
 FAST_ESTABLISHING_METHOD = True
 
 # Дамп с начальным распределением всех частиц, указать None при отсутсвии оного
-DUMP_FILE = './picts/picts_cuda_20160322012746/dump.pickle' # './picts/picts_cuda_20160321192524/dump.pickle'
+DUMP_FILE = None
+# DUMP_FILE = './picts/picts_cuda_20160322012746/dump.pickle' # './picts/picts_cuda_20160321192524/dump.pickle'
 DUMP_FILE = DUMP_FILE if DUMP_FILE and os.path.exists(DUMP_FILE) \
     else False
 
@@ -75,9 +76,9 @@ Y_DIMENSION_GRID = 1.0E-2
 Z_DIMENSION_GRID = 1.0E-2
 
 # Число шагов по сетке для крупных частиц
-X_STEP_NUMBER_GRID = 100
-Y_STEP_NUMBER_GRID = 100
-Z_STEP_NUMBER_GRID = 100
+X_STEP_NUMBER_GRID = 50
+Y_STEP_NUMBER_GRID = 50
+Z_STEP_NUMBER_GRID = 50
 
 # Шаг по сетке
 X_STEP = X_DIMENSION_GRID / X_STEP_NUMBER_GRID

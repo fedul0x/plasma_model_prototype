@@ -180,6 +180,7 @@ def main(prefix):
     big_helium_radius = \
         (hi * HELIUMS_RADIUS ** 3 * HELIUMS_NUMBER) ** (1.0 / 3.0)
     big_helium_charge = HELIUMS_CHARGE * HELIUMS_NUMBER
+    prev_phi, next_phi = [], []
     if not DUMP_FILE:
         # Распределение углерода
         for _ in range(CARBON_LAYERS_NUMBER):
@@ -192,7 +193,9 @@ def main(prefix):
                         spread_speed(carbon_randomizer, dimensionless=csdu)
                     for v, l in zip([0, y_big, z_big, big_carbon_radius, big_carbon_charge, x_speed, y_speed, z_speed], range(carbon.shape[2])):
                         carbon[absolute_time][carbon_num][l] = v
+                    print(carbon_num, carbon[absolute_time][carbon_num])
                     carbon_num += 1
+        # return 
         # Распределение электронов
         for y, j in zip(y_range[:-1], range(y_range.shape[0] - 1)):
             for z, k in zip(z_range[:-1], range(z_range.shape[0] - 1)):
@@ -212,18 +215,20 @@ def main(prefix):
                     for v, l in zip([x_big, y_big, z_big, big_helium_radius, big_helium_charge, x_speed, y_speed, z_speed], range(helium.shape[2])):
                         helium[absolute_time][num][l] = v
                     num += 1
-        # Make dump for future usage 
-        with open(prefix + '/dump.pickle', 'wb') as dump_file:
-            pickle.dump((carbon, electron, helium), dump_file)
-        return
     else:
         with open(DUMP_FILE, 'rb') as dump_file:
-            carbon, electron, helium = pickle.load(dump_file)
+            carbon, electron, helium, prev_phi, next_phi = pickle.load(dump_file)
 
     # MODELING CYCLE BEGIN
     num = 0  # number of particle
     absolute_time = 0  # absolute time
-    prev_phi, next_phi = [], []
+    import sqlite3 as lite
+    from datetime import date 
+    connection = lite.connect('./picts/db.sqlite')
+    cursor = connection.cursor()
+    cursor.execute('insert into experiment (date, description) VALUES ("{}", "{}")'.format(date.today(), ""))
+    connection.commit()
+    last_id = cursor.execute('select max(id) from experiment').fetchone()[0]
     # Для итоговых графиков
     # if DUMP_FILE:
     #     with open(DUMP_FILE, 'rb') as dump_file:
@@ -245,7 +250,7 @@ def main(prefix):
             names = ['electron', 'carbon', 'helium']
             for grid, position, name, size in zip(grids, positions, names, sizes):
                 n = grid.shape
-                print("SIZES {} carbons_in_process {}". format(size, carbons_in_process))
+                # print("SIZES {} carbons_in_process {}". format(size, carbons_in_process))
                 for num in range(size):
                     x_big, y_big, z_big, _, charge, _, _, _ = position[curr_time][num]
                     try:
@@ -258,6 +263,7 @@ def main(prefix):
                     # Redistribution of carbon when it reaches the end of the simulation area
                     if name == 'carbon':
                         if (i<0) or (j<0) or (k<0) or (i>n[0]-2) or (j>n[1]-2) or (k>n[2]-2):
+                            print("ЕРШ {} {} {}".format(i, j, k, x_big, y_big, z_big))
                             cell = (0, np.random.choice(y_range[:-1]), np.random.choice(z_range[:-1]))
                             x_big, y_big, z_big = \
                                 spread_position(cell, CARBONS_NUMBER)
@@ -295,8 +301,13 @@ def main(prefix):
                 prev_phi, next_phi, ro = \
                     make_boundary_conditions(phi, n, ecg, ccg, hcg)
             # Potential establish method
+            ema = ESTABLISHING_METHOD_ACCURACY
             prev_phi, next_phi = \
-                em(prev_phi, next_phi, ro, epsilon=ESTABLISHING_METHOD_ACCURACY)
+                em(prev_phi, next_phi, ro, epsilon=ema)
+            if not DUMP_FILE:
+                # Make dump for future usage
+                with open(prefix + '/dump.pickle', 'wb') as dump_file:
+                    pickle.dump((carbon, electron, helium, prev_phi, next_phi), dump_file)
             end = time.time()
             print('Establishing method elapsed time = {}'.format(end-start))
             # Calculation of tension
@@ -382,27 +393,58 @@ def main(prefix):
                         carbon[p_next_time(absolute_time)][num][5+dim] = res[-1][1]
                     else:
                         carbon[p_next_time(absolute_time)][num][5+dim] = carbon[curr_time(absolute_time)][num][5+dim]
+            # Copy another particles arrays
+            for num in range(carbons_in_process, carbon.shape[1]):
+                for l in range(carbon.shape[2]):
+                    carbon[p_next_time(absolute_time)][num][l] = \
+                        carbon[curr_time][num][l]
             for num in range(electron.shape[1]):
                 for l in range(electron.shape[2]):
-                    electron[p_next_time(absolute_time)][num][l] = electron[curr_time][num][l]
+                    electron[p_next_time(absolute_time)][num][l] = \
+                        electron[curr_time][num][l]
             for num in range(helium.shape[1]):
                 for l in range(helium.shape[2]):
-                    helium[p_next_time(absolute_time)][num][l] = helium[curr_time][num][l]
+                    helium[p_next_time(absolute_time)][num][l] = \
+                        helium[curr_time][num][l]
             end = time.time()
             print('Differential equations solution elapsed time = {}'.format(end-start))
+            sql = '''insert into iteration (id_experiment, time)
+                VALUES ("{}", "{}")'''.format(last_id, absolute_time*TIME_STEP)
+            cursor.execute(sql)
+            connection.commit()
+            sql = 'select max(id) from iteration'
+            last_iteration_id = cursor.execute(sql).fetchone()[0]
+            sql = 'select max(id) from particle'
+            last_particle_id = cursor.execute(sql).fetchone()[0]
+            for i in range(carbons_in_process):
+                c = get_component(carbon[curr_time][i], n=8)
+                sql = '''insert into particle (id_iteration, pos_x, pos_y, pos_z,
+                    radius, charge, speed_x, speed_y, speed_z)
+                    VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {})'''\
+                    .format(last_iteration_id, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7])
+                cursor.execute(sql)
+            connection.commit()
+            for i in crashesCarbon:
+                sql = '''insert into collision (id_iteration,
+                    id_particle_1, id_particle_2, energy)
+                    VALUES ({}, {}, {}, {})'''\
+                    .format(last_iteration_id, i[0]+last_particle_id, i[1]+last_particle_id, 0)
+                cursor.execute(sql)
+            connection.commit()
+
 
             absolute_time += 1
             if absolute_time < CARBON_LAYERS_NUMBER:
-                carbons_in_process += Y_STEP_NUMBER_GRID * Z_STEP_NUMBER_GRID
+                carbons_in_process += cpl
             print('absolute time = {} '.format(absolute_time))
             start = time.time()
             # if absolute_time % 3 == 1:
             #     with open(prefix + '/dump_{}.pickle'.format(absolute_time % 2), 'wb') as dump_file:
             #         pickle.dump((absolute_time, carbon, electron, helium, prev_phi, next_phi, crashesCarbon, crashesElectron, crashesHelium, typeI, typeII,typeIII, begin_speed_distribution_data, end_speed_distribution_data, listen_particles, plot_data), dump_file)
-            end = time.time()
-            print('Dump saving elapsed time = {}'.format(end-start))
+            # end = time.time()
+            # print('Dump saving elapsed time = {}'.format(end-start))
 
-            start = time.time()
+            # start = time.time()
     # except IndexError:
     #     print('IndexError')
     #     pass

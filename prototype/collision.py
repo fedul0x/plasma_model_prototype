@@ -48,7 +48,8 @@ def find_carbon_collision_rust(particles, currtime, prevtime):
     # data_set = set(data)
     # print("Thread num {}\tCubes {}\tLength {}\tSet length {}\tTime {}".format(thread_num, step_num**3, len(data)/2, len(data_set)/2, end-start))
 
-    return [tuple(particles[curr_time][i[1]][:]) for i in data]
+    # return [tuple(particles[curr_time][i[1]][:]) for i in data]
+    return data
 
 
 def find_collision_rust(parttype1, parttype2, currtime, prevtime):
