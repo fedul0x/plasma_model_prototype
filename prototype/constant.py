@@ -76,9 +76,9 @@ Y_DIMENSION_GRID = 1.0E-2
 Z_DIMENSION_GRID = 1.0E-2
 
 # Число шагов по сетке для крупных частиц
-X_STEP_NUMBER_GRID = 50
-Y_STEP_NUMBER_GRID = 50
-Z_STEP_NUMBER_GRID = 50
+X_STEP_NUMBER_GRID = 5
+Y_STEP_NUMBER_GRID = 5
+Z_STEP_NUMBER_GRID = 5
 
 # Шаг по сетке
 X_STEP = X_DIMENSION_GRID / X_STEP_NUMBER_GRID
@@ -118,3 +118,10 @@ Mt = 5.211008445E-12
 
 # Сплоченность мелких частиц внутри крупной
 hi = 0.7  # 0..1
+
+# CONSTANT_NAMES = [i for i in dir() if i.upper() == i]
+CONSTANT_NAMES = list(filter(lambda x: x.upper() == x, dir()))
+names = CONSTANT_NAMES
+# CONSTANT_VALUES = dict([(i, j) for i, j in globals().items() if i in CONSTANT_NAMES])
+CONSTANT_VALUES = dict(filter(lambda x: x[0] in names, globals().items()))
+print(CONSTANT_NAMES, CONSTANT_VALUES)

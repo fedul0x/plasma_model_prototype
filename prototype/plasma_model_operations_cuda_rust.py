@@ -182,7 +182,7 @@ def main(prefix):
     big_helium_charge = HELIUMS_CHARGE * HELIUMS_NUMBER
     prev_phi, next_phi = [], []
     if not DUMP_FILE:
-        # Распределение углерода
+        # Carbon distribution
         for _ in range(CARBON_LAYERS_NUMBER):
             for y, j in zip(y_range[:-1], range(y_range.shape[0] - 1)):
                 for z, k in zip(z_range[:-1], range(z_range.shape[0] - 1)):
@@ -195,8 +195,7 @@ def main(prefix):
                         carbon[absolute_time][carbon_num][l] = v
                     print(carbon_num, carbon[absolute_time][carbon_num])
                     carbon_num += 1
-        # return 
-        # Распределение электронов
+        # Electron and helium distribution
         for y, j in zip(y_range[:-1], range(y_range.shape[0] - 1)):
             for z, k in zip(z_range[:-1], range(z_range.shape[0] - 1)):
                 for x, i in zip(x_range[:-1], range(x_range.shape[0] - 1)):
@@ -207,7 +206,6 @@ def main(prefix):
                         spread_speed(electron_randomizer, dimensionless=esdu)
                     for v, l in zip([x_big, y_big, z_big, big_electron_radius, big_electron_charge, x_speed, y_speed, z_speed], range(electron.shape[2])):
                         electron[absolute_time][num][l] = v
-                    # Распределение гелия
                     x_big, y_big, z_big = \
                         spread_position(cell, HELIUMS_NUMBER)
                     x_speed, y_speed, z_speed = \
@@ -216,6 +214,7 @@ def main(prefix):
                         helium[absolute_time][num][l] = v
                     num += 1
     else:
+        # Restore from dump particles and potential field
         with open(DUMP_FILE, 'rb') as dump_file:
             carbon, electron, helium, prev_phi, next_phi = pickle.load(dump_file)
 
@@ -229,10 +228,6 @@ def main(prefix):
     cursor.execute('insert into experiment (date, description) VALUES ("{}", "{}")'.format(date.today(), ""))
     connection.commit()
     last_id = cursor.execute('select max(id) from experiment').fetchone()[0]
-    # Для итоговых графиков
-    # if DUMP_FILE:
-    #     with open(DUMP_FILE, 'rb') as dump_file:
-    #         absolute_time, carbon, electron, helium, prev_phi, next_phi, crashesCarbon, crashesElectron, crashesHelium, typeI, typeII, typeIII, begin_speed_distribution_data, end_speed_distribution_data, listen_particles, plot_data = pickle.load(dump_file)
     end = time.time()
     print('Particle distribution elapsed time = {}'.format(end-start))
     try:
@@ -263,7 +258,7 @@ def main(prefix):
                     # Redistribution of carbon when it reaches the end of the simulation area
                     if name == 'carbon':
                         if (i<0) or (j<0) or (k<0) or (i>n[0]-2) or (j>n[1]-2) or (k>n[2]-2):
-                            print("ЕРШ {} {} {}".format(i, j, k, x_big, y_big, z_big))
+                            # print("ЕРШ {} {} {}".format(i, j, k, x_big, y_big, z_big))
                             cell = (0, np.random.choice(y_range[:-1]), np.random.choice(z_range[:-1]))
                             x_big, y_big, z_big = \
                                 spread_position(cell, CARBONS_NUMBER)
@@ -277,7 +272,6 @@ def main(prefix):
                     x, y, z = \
                         i*X_STEP, j*Y_STEP, k*Z_STEP
                     patch = spread_charge((x, y, z), (x_big, y_big, z_big), charge)
-                    # print(name)
                     for p in patch:
                         grid[i+p[0]][j+p[1]][k+p[2]] += p[3]
             end = time.time()
@@ -304,10 +298,11 @@ def main(prefix):
             ema = ESTABLISHING_METHOD_ACCURACY
             prev_phi, next_phi = \
                 em(prev_phi, next_phi, ro, epsilon=ema)
+            # Dump particles and potential field
             if not DUMP_FILE:
-                # Make dump for future usage
                 with open(prefix + '/dump.pickle', 'wb') as dump_file:
                     pickle.dump((carbon, electron, helium, prev_phi, next_phi), dump_file)
+                DUMP_FILE = True
             end = time.time()
             print('Establishing method elapsed time = {}'.format(end-start))
             # Calculation of tension
@@ -348,7 +343,6 @@ def main(prefix):
             end = time.time()
             print('Tension by particle calcing elapsed time = {}'.format(end-start))
             
-            # print('Crashing')
             start = time.time()
             crashesCarbon, crashesElectron, crashesHelium = [], [], []
             if absolute_time != 0:
@@ -437,14 +431,6 @@ def main(prefix):
             if absolute_time < CARBON_LAYERS_NUMBER:
                 carbons_in_process += cpl
             print('absolute time = {} '.format(absolute_time))
-            start = time.time()
-            # if absolute_time % 3 == 1:
-            #     with open(prefix + '/dump_{}.pickle'.format(absolute_time % 2), 'wb') as dump_file:
-            #         pickle.dump((absolute_time, carbon, electron, helium, prev_phi, next_phi, crashesCarbon, crashesElectron, crashesHelium, typeI, typeII,typeIII, begin_speed_distribution_data, end_speed_distribution_data, listen_particles, plot_data), dump_file)
-            # end = time.time()
-            # print('Dump saving elapsed time = {}'.format(end-start))
-
-            # start = time.time()
     # except IndexError:
     #     print('IndexError')
     #     pass
