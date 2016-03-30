@@ -15,6 +15,7 @@ from plot import *
 from establishing_method import *
 from establishing_method import potential_establish_method_cuda as em
 from collision import *
+from dump import *
 
 
 def p_time(absolute_time):
@@ -162,7 +163,7 @@ def main(prefix):
     num = 0  # номер частицы
     carbon_num = 0  # номер углерода
     carbons_in_process = cpl  # carbon particles across layers
-    absolute_time = 0  # позиция по временной шкале с учетом цикличности заполнения
+    absolute_time = 0  # позиция по временной шкале
     # TODO оптимизировать получения случвела Максвелла
     # print('Particle distribution')
     start = time.time()
@@ -181,8 +182,14 @@ def main(prefix):
         (hi * HELIUMS_RADIUS ** 3 * HELIUMS_NUMBER) ** (1.0 / 3.0)
     big_helium_charge = HELIUMS_CHARGE * HELIUMS_NUMBER
     prev_phi, next_phi = [], []
-    if not DUMP_FILE:
+    # Restore from dump particles and potential field
+    is_dumped = True
+    data = restore_from_dump(DUMP_FOLDER, CONSTANT_VALUES)
+    if not(data is None):
+        carbon, electron, helium, prev_phi, next_phi = data
+    else:
         # Carbon distribution
+        is_dumped = False
         for _ in range(CARBON_LAYERS_NUMBER):
             for y, j in zip(y_range[:-1], range(y_range.shape[0] - 1)):
                 for z, k in zip(z_range[:-1], range(z_range.shape[0] - 1)):
@@ -213,10 +220,6 @@ def main(prefix):
                     for v, l in zip([x_big, y_big, z_big, big_helium_radius, big_helium_charge, x_speed, y_speed, z_speed], range(helium.shape[2])):
                         helium[absolute_time][num][l] = v
                     num += 1
-    else:
-        # Restore from dump particles and potential field
-        with open(DUMP_FILE, 'rb') as dump_file:
-            carbon, electron, helium, prev_phi, next_phi = pickle.load(dump_file)
 
     # MODELING CYCLE BEGIN
     num = 0  # number of particle
@@ -299,10 +302,10 @@ def main(prefix):
             prev_phi, next_phi = \
                 em(prev_phi, next_phi, ro, epsilon=ema)
             # Dump particles and potential field
-            if not DUMP_FILE:
-                with open(prefix + '/dump.pickle', 'wb') as dump_file:
-                    pickle.dump((carbon, electron, helium, prev_phi, next_phi), dump_file)
-                DUMP_FILE = True
+            if not is_dumped:
+                data = (carbon, electron, helium, prev_phi, next_phi)
+                save_to_dump(DUMP_FOLDER, CONSTANT_VALUES, data)
+                is_dumped = True
             end = time.time()
             print('Establishing method elapsed time = {}'.format(end-start))
             # Calculation of tension

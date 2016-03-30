@@ -8,11 +8,8 @@ __author__ = 'fedul0x'
 # (на основе предыдущих значений)
 FAST_ESTABLISHING_METHOD = True
 
-# Дамп с начальным распределением всех частиц, указать None при отсутсвии оного
-DUMP_FILE = None
-# DUMP_FILE = './picts/picts_cuda_20160322012746/dump.pickle' # './picts/picts_cuda_20160321192524/dump.pickle'
-DUMP_FILE = DUMP_FILE if DUMP_FILE and os.path.exists(DUMP_FILE) \
-    else False
+# Каталог с дампами, указать None при отсутвии оного
+DUMP_FOLDER = '/home/fedul0x/tmp/dumps'
 
 # Колчиство тактов моделирования
 MODELING_TIME = 1200
@@ -76,9 +73,9 @@ Y_DIMENSION_GRID = 1.0E-2
 Z_DIMENSION_GRID = 1.0E-2
 
 # Число шагов по сетке для крупных частиц
-X_STEP_NUMBER_GRID = 5
-Y_STEP_NUMBER_GRID = 5
-Z_STEP_NUMBER_GRID = 5
+X_STEP_NUMBER_GRID = 10
+Y_STEP_NUMBER_GRID = 10
+Z_STEP_NUMBER_GRID = 10
 
 # Шаг по сетке
 X_STEP = X_DIMENSION_GRID / X_STEP_NUMBER_GRID
@@ -124,4 +121,3 @@ CONSTANT_NAMES = list(filter(lambda x: x.upper() == x, dir()))
 names = CONSTANT_NAMES
 # CONSTANT_VALUES = dict([(i, j) for i, j in globals().items() if i in CONSTANT_NAMES])
 CONSTANT_VALUES = dict(filter(lambda x: x[0] in names, globals().items()))
-print(CONSTANT_NAMES, CONSTANT_VALUES)
