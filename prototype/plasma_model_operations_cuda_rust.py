@@ -64,7 +64,16 @@ class MWranomizer2:
 def get_component(particle, b=0, n=3):
     return [particle[i] for i in range(b, b+n)]
 
-
+def get_collision_energy(part1, part2):
+    xc, yc, zc, radiusc, chrg, vcx, vcy, vcz = part1
+    xc2, yc2, zc2, radiusc2, chrg2, vcx2, vcy2, vcz2 = part2
+    m1 = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
+    m2 = CARBONS_MASS*radiusc2**3 / hi / CARBONS_RADIUS**3
+    v1 = CARBON_SPEED_DIMENSIONLESS_UNIT*np.sqrt(vcx**2 + vcy**2 + vcz**2)
+    v2 = CARBON_SPEED_DIMENSIONLESS_UNIT*np.sqrt(vcx2**2 + vcy2**2 + vcz2**2)
+    e1 = m1 * v1**2 / 2 / CARBONS_NUMBER * AVOGADRO_CONSTANT
+    e2 = m2 * v2**2 / 2 / CARBONS_NUMBER * AVOGADRO_CONSTANT
+    return (e1, e2)
 # def getSpeedProjection(particle):
 #     # speed = particle[5]
 #     # devider = np.sqrt(3)
@@ -185,7 +194,7 @@ def main(prefix):
     # Restore from dump particles and potential field
     is_dumped = True
     data = restore_from_dump(DUMP_FOLDER, CONSTANT_VALUES)
-    if not(data is None):
+    if not (data is None):
         carbon, electron, helium, prev_phi, next_phi = data
     else:
         # Carbon distribution
@@ -224,15 +233,11 @@ def main(prefix):
     # MODELING CYCLE BEGIN
     num = 0  # number of particle
     absolute_time = 0  # absolute time
-    import sqlite3 as lite
-    from datetime import date 
-    connection = lite.connect('./picts/db.sqlite')
-    cursor = connection.cursor()
-    cursor.execute('insert into experiment (date, description) VALUES ("{}", "{}")'.format(date.today(), ""))
-    connection.commit()
-    last_id = cursor.execute('select max(id) from experiment').fetchone()[0]
     end = time.time()
     print('Particle distribution elapsed time = {}'.format(end-start))
+    marshal = lambda x: '{} = {}'.format(x[0], x[1])
+    constants = map(marshal, CONSTANT_VALUES.items())
+    db_log = DbConnection(DB_FILE, '\n'.join(constants))
     try:
         while (absolute_time < MODELING_TIME):
             curr_time = p_time(absolute_time)
@@ -347,16 +352,65 @@ def main(prefix):
             print('Tension by particle calcing elapsed time = {}'.format(end-start))
             
             start = time.time()
-            crashesCarbon, crashesElectron, crashesHelium = [], [], []
+            сarbon_collisions, electron_collisions, helium_collisions = [], [], []
             if absolute_time != 0:
                 curr_time = p_time(absolute_time)
                 prev_time = p_prev_time(absolute_time)
-                crashesCarbon   = find_carbon_collision_rust(carbon, curr_time, prev_time)
+                сarbon_collisions   = find_carbon_collision_rust(carbon, curr_time, prev_time)
+                offsets = []
+                for col in сarbon_collisions:
+                    e1, e2 = get_collision_energy(carbon[curr_time][col[0]], carbon[curr_time][col[1]])
+                    xc, yc, zc, radiusc, chrg, vcx, vcy, vcz = carbon[curr_time][col[0]]
+                    xc2, yc2, zc2, radiusc2, chrg2, vcx2, vcy2, vcz2 = carbon[curr_time][col[1]]
+                    m1 = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
+                    m2 = CARBONS_MASS*radiusc2**3 / hi / CARBONS_RADIUS**3
+                    # 348000
+                    if e1 + e2 > 348000:
+                        r = (((m1 + m2) * hi * CARBONS_RADIUS**3) / CARBONS_MASS)**(1.0/3)
+                        carbon[curr_time][col[0]][3] = r
+                        carbon[curr_time][col[0]][4] = chrg + chrg2
+                        carbon[curr_time][col[0]][5] = vcx + vcx2
+                        carbon[curr_time][col[0]][6] = vcy + vcy2
+                        carbon[curr_time][col[0]][7] = vcz + vcz2
+                        offsets += [col[1]]
+                        continue
+                    else:
+                        carbon[curr_time][col[0]][5] = vcx2
+                        carbon[curr_time][col[0]][6] = vcy2
+                        carbon[curr_time][col[0]][7] = vcz2
+                        carbon[curr_time][col[1]][5] = vcx
+                        carbon[curr_time][col[1]][6] = vcy
+                        carbon[curr_time][col[1]][7] = vcz
+                    # 614000
+                    # if e1 + e2 > 614000:
+                    #     typeII += [carbon[curr_time][b][0]]
+                    #     continue
+                    # 839000
+                    # if e1 + e2 > 839000:
+                    #     typeIII += [carbon[curr_time][b][0]]
+                    #     continue
+                if offsets:
+                    v1, v2 = min(offsets), min(offsets)
+                    offset, i = 0, v1
+                    while i < carbon.shape[1]:  # for i in range(v1, v2):
+                        while i+offset in offsets:
+                            offset += 1
+                        if i + offset < carbons_in_process:
+                            carbon[curr_time][i] = carbon[curr_time][i+offset]
+                        i += 1
+                    carbons_in_process -= len(offsets)
+                print('\n\n\n\n')
+                print('CARBONS_IN_PROCESS ================= {}'.format(carbons_in_process))
+                print(offsets)
+                print('CARBONS_IN_PROCESS ================= {}'.format(carbons_in_process))
+                print('\n\n\n\n')
 
-                # crashesElectron = find_collision_rust(carbon, electron, curr_time, prev_time)
-                # crashesHelium   = find_collision_rust(carbon, helium, curr_time, prev_time)
+
+
+                # electron_collisions = find_collision_rust(carbon, electron, curr_time, prev_time)
+                # helium_collisions   = find_collision_rust(carbon, helium, curr_time, prev_time)
             end = time.time()
-            print('Crash finding elapsed time = {}'.format(end-start))
+            print('Collisions finding elapsed time = {}'.format(end-start))
             # Solutions of differential equations
             start = time.time()
             t = np.linspace(0, TIME_STEP / Mt, 2)
@@ -405,29 +459,16 @@ def main(prefix):
                         helium[curr_time][num][l]
             end = time.time()
             print('Differential equations solution elapsed time = {}'.format(end-start))
-            sql = '''insert into iteration (id_experiment, time)
-                VALUES ("{}", "{}")'''.format(last_id, absolute_time*TIME_STEP)
-            cursor.execute(sql)
-            connection.commit()
-            sql = 'select max(id) from iteration'
-            last_iteration_id = cursor.execute(sql).fetchone()[0]
-            sql = 'select max(id) from particle'
-            last_particle_id = cursor.execute(sql).fetchone()[0]
-            for i in range(carbons_in_process):
-                c = get_component(carbon[curr_time][i], n=8)
-                sql = '''insert into particle (id_iteration, pos_x, pos_y, pos_z,
-                    radius, charge, speed_x, speed_y, speed_z)
-                    VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {})'''\
-                    .format(last_iteration_id, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7])
-                cursor.execute(sql)
-            connection.commit()
-            for i in crashesCarbon:
-                sql = '''insert into collision (id_iteration,
-                    id_particle_1, id_particle_2, energy)
-                    VALUES ({}, {}, {}, {})'''\
-                    .format(last_iteration_id, i[0]+last_particle_id, i[1]+last_particle_id, 0)
-                cursor.execute(sql)
-            connection.commit()
+            db_log.new_iteration(absolute_time*TIME_STEP)
+            db_log.new_particle(carbon, curr_time, carbons_in_process)
+
+            def enrg(x):
+                p1 = carbon[curr_time][x[0]]
+                p2 = carbon[curr_time][x[1]]
+                e = get_collision_energy(p1, p2)
+                return (x[0], x[1], sum(e))
+            сarbon_collisions = map(enrg, сarbon_collisions)
+            db_log.new_collision(сarbon_collisions)
 
 
             absolute_time += 1

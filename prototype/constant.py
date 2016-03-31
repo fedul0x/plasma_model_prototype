@@ -11,6 +11,9 @@ FAST_ESTABLISHING_METHOD = True
 # Каталог с дампами, указать None при отсутвии оного
 DUMP_FOLDER = '/home/fedul0x/tmp/dumps'
 
+# Файл базы данных
+DB_FILE = '/home/fedul0x/tmp/dumps/db.sqlite'
+
 # Колчиство тактов моделирования
 MODELING_TIME = 1200
 # Длинна истории
@@ -73,9 +76,9 @@ Y_DIMENSION_GRID = 1.0E-2
 Z_DIMENSION_GRID = 1.0E-2
 
 # Число шагов по сетке для крупных частиц
-X_STEP_NUMBER_GRID = 10
-Y_STEP_NUMBER_GRID = 10
-Z_STEP_NUMBER_GRID = 10
+X_STEP_NUMBER_GRID = 100
+Y_STEP_NUMBER_GRID = 100
+Z_STEP_NUMBER_GRID = 100
 
 # Шаг по сетке
 X_STEP = X_DIMENSION_GRID / X_STEP_NUMBER_GRID
