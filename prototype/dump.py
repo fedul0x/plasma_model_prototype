@@ -94,12 +94,21 @@ class DbConnection:
             # TODO calc energy
             id1, id2, e = \
                 i[0]+self.particle_last_id, i[1]+self.particle_last_id, i[2]
-            print(id1, id2, e)
+            # print(id1, id2, e)
             sql = '''insert into collision (id_iteration,
                 id_particle_1, id_particle_2, energy)
                 VALUES ({}, {}, {}, {})'''\
                 .format(self.iteration_last_id, id1, id2, e)
             self.cursor.execute(sql)
         self.connection.commit()
-        # self.collision_last_id = self.cursor.execute('select max(id) from collision').fetchone()[0]
+
+    def new_final(self, carbons):
+        for i in carbons:
+            c = ', '.join([str(i[j]) for j in range(8)])
+            sql = '''insert into final (id_iteration, pos_x, pos_y, pos_z,
+                radius, charge, speed_x, speed_y, speed_z)
+                VALUES ({}, {})'''\
+                .format(self.iteration_last_id, c)
+            self.cursor.execute(sql)
+        self.connection.commit()
 

@@ -251,6 +251,7 @@ def main(prefix):
             sizes = [electron.shape[1], carbons_in_process, helium.shape[1]]
             grids = [electron_charge_grid, carbon_charge_grid, helium_charge_grid]
             names = ['electron', 'carbon', 'helium']
+            offsets, carbon_final = [], []
             for grid, position, name, size in zip(grids, positions, names, sizes):
                 n = grid.shape
                 # print("SIZES {} carbons_in_process {}". format(size, carbons_in_process))
@@ -265,23 +266,29 @@ def main(prefix):
                         int(x_big/X_STEP), int(y_big/Y_STEP), int(z_big/Z_STEP)
                     # Redistribution of carbon when it reaches the end of the simulation area
                     if name == 'carbon':
+                        # print('Checking carbon num = {}'.format(num))
                         if (i<0) or (j<0) or (k<0) or (i>n[0]-2) or (j>n[1]-2) or (k>n[2]-2):
-                            # print("ЕРШ {} {} {}".format(i, j, k, x_big, y_big, z_big))
-                            cell = (0, np.random.choice(y_range[:-1]), np.random.choice(z_range[:-1]))
-                            x_big, y_big, z_big = \
-                                spread_position(cell, CARBONS_NUMBER)
-                            x_speed, y_speed, z_speed = \
-                                spread_speed(carbon_randomizer, dimensionless=csdu)
-                            for v, l in zip([0, y_big, z_big, big_carbon_radius, big_carbon_charge, x_speed, y_speed, z_speed], range(carbon.shape[2])):
-                                position[curr_time][num][l] = v
-                            x_big, y_big, z_big, _, charge, _, _, _ = position[curr_time][num]
-                            i, j, k = \
-                                int(x_big/X_STEP), int(y_big/Y_STEP), int(z_big/Z_STEP)
+                            offsets += [num]
+                            carbon_final += [position[curr_time][num]]
+                            continue
                     x, y, z = \
                         i*X_STEP, j*Y_STEP, k*Z_STEP
                     patch = spread_charge((x, y, z), (x_big, y_big, z_big), charge)
                     for p in patch:
                         grid[i+p[0]][j+p[1]][k+p[2]] += p[3]
+            if offsets:
+                print('\n\nCIP = {} OFFSETS {}\n\n'.format(carbons_in_process, offsets))
+                db_log.new_final(carbon_final)
+                v1, v2 = min(offsets), min(offsets)
+                offset, i = 0, v1
+                while i < carbon.shape[1]:  # for i in range(v1, v2):
+                    while i+offset in offsets:
+                        offset += 1
+                    if i + offset < carbon.shape[1]:
+                        print('{} <= {}'.format(i, i+offset))
+                        carbon[curr_time][i] = carbon[curr_time][i+offset]
+                    i += 1
+                carbons_in_process -= len(offsets)
             end = time.time()
             print('Calcing charge in cells elapsed time = {}'.format(end-start))
 
@@ -356,7 +363,8 @@ def main(prefix):
             if absolute_time != 0:
                 curr_time = p_time(absolute_time)
                 prev_time = p_prev_time(absolute_time)
-                сarbon_collisions   = find_carbon_collision_rust(carbon, curr_time, prev_time)
+                сarbon_collisions = find_carbon_collision_rust(carbon, carbons_in_process, curr_time, prev_time)
+                print('сarbon_collisions = {}'.format(len(сarbon_collisions)))
                 offsets = []
                 for col in сarbon_collisions:
                     e1, e2 = get_collision_energy(carbon[curr_time][col[0]], carbon[curr_time][col[1]])
@@ -365,7 +373,7 @@ def main(prefix):
                     m1 = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
                     m2 = CARBONS_MASS*radiusc2**3 / hi / CARBONS_RADIUS**3
                     # 348000
-                    if e1 + e2 > 348000:
+                    if e1 + e2 > 348000: ###################################
                         r = (((m1 + m2) * hi * CARBONS_RADIUS**3) / CARBONS_MASS)**(1.0/3)
                         carbon[curr_time][col[0]][3] = r
                         carbon[curr_time][col[0]][4] = chrg + chrg2
@@ -389,18 +397,22 @@ def main(prefix):
                     # if e1 + e2 > 839000:
                     #     typeIII += [carbon[curr_time][b][0]]
                     #     continue
+                print('\n\n\n\n')
+                print('CARBONS_IN_PROCESS ================= {}'.format(carbons_in_process))
+                print('CIP = {} OFF = {}'.format(carbons_in_process, len(offsets)))
+                print
                 if offsets:
                     v1, v2 = min(offsets), min(offsets)
                     offset, i = 0, v1
                     while i < carbon.shape[1]:  # for i in range(v1, v2):
                         while i+offset in offsets:
                             offset += 1
-                        if i + offset < carbons_in_process:
+                        if i + offset < carbon.shape[1]:
+                            print('{} <= {}'.format(i, i+offset))
                             carbon[curr_time][i] = carbon[curr_time][i+offset]
                         i += 1
                     carbons_in_process -= len(offsets)
-                print('\n\n\n\n')
-                print('CARBONS_IN_PROCESS ================= {}'.format(carbons_in_process))
+                print('CIP after deleting = {}'.format(carbons_in_process))
                 print(offsets)
                 print('CARBONS_IN_PROCESS ================= {}'.format(carbons_in_process))
                 print('\n\n\n\n')

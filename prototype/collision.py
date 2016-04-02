@@ -18,17 +18,19 @@ __author__ = 'fedul0x'
 # Y_STEP_COLLISION = Y_DIMENSION_GRID / Y_DIMENSION_COLLISION
 # Z_STEP_COLLISION = Z_DIMENSION_GRID / Z_DIMENSION_COLLISION
 
-def find_carbon_collision_rust(particles, currtime, prevtime):
+def find_carbon_collision_rust(particles, partnum, currtime, prevtime):
     curr_time = currtime
     prev_time = prevtime
-    length = particles.shape[1]
-    prev_data_x = (ctypes.c_double * length) (*[i[0] for i in particles[prev_time]])
-    prev_data_y = (ctypes.c_double * length) (*[i[1] for i in particles[prev_time]])
-    prev_data_z = (ctypes.c_double * length) (*[i[2] for i in particles[prev_time]])
-    next_data_x = (ctypes.c_double * length) (*[i[0] for i in particles[curr_time]])
-    next_data_y = (ctypes.c_double * length) (*[i[1] for i in particles[curr_time]])
-    next_data_z = (ctypes.c_double * length) (*[i[2] for i in particles[curr_time]])
-    radiuses    = (ctypes.c_double * length) (*[i[3] for i in particles[curr_time]])
+    # length = particles.shape[1]
+    length = partnum
+    print('Length Length Length Length {}'.format(length))
+    prev_data_x = (ctypes.c_double * length) (*[particles[prev_time][i][0] for i in range(partnum)])
+    prev_data_y = (ctypes.c_double * length) (*[particles[prev_time][i][1] for i in range(partnum)])
+    prev_data_z = (ctypes.c_double * length) (*[particles[prev_time][i][2] for i in range(partnum)])
+    next_data_x = (ctypes.c_double * length) (*[particles[curr_time][i][0] for i in range(partnum)])
+    next_data_y = (ctypes.c_double * length) (*[particles[curr_time][i][1] for i in range(partnum)])
+    next_data_z = (ctypes.c_double * length) (*[particles[curr_time][i][2] for i in range(partnum)])
+    radiuses    = (ctypes.c_double * length) (*[particles[curr_time][i][3] for i in range(partnum)])
 
     class Slice(Structure):
         _fields_ = [("ptr", POINTER(c_int32)), ("len", c_uint64)]
