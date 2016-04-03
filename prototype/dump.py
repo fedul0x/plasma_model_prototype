@@ -79,9 +79,9 @@ class DbConnection:
 
     def new_particle(self, carbon, currtime, carbonum):
         for i in range(carbonum):
-            c = ', '.join([str(carbon[currtime][i][j]) for j in range(8)])
+            c = ', '.join([str(carbon[currtime][i][j]) for j in range(9)])
             sql = '''insert into particle (id_iteration, pos_x, pos_y, pos_z,
-                radius, charge, speed_x, speed_y, speed_z)
+                radius, charge, speed_x, speed_y, speed_z, guid)
                 VALUES ({}, {})'''\
                 .format(self.iteration_last_id, c)
             self.cursor.execute(sql)
@@ -104,11 +104,10 @@ class DbConnection:
 
     def new_final(self, carbons):
         for i in carbons:
-            c = ', '.join([str(i[j]) for j in range(8)])
+            c = ', '.join([str(i[j]) for j in range(9)])
             sql = '''insert into final (id_iteration, pos_x, pos_y, pos_z,
-                radius, charge, speed_x, speed_y, speed_z)
+                radius, charge, speed_x, speed_y, speed_z, guid)
                 VALUES ({}, {})'''\
                 .format(self.iteration_last_id, c)
             self.cursor.execute(sql)
         self.connection.commit()
-

@@ -10,6 +10,7 @@ FAST_ESTABLISHING_METHOD = True
 
 # Каталог с дампами, указать None при отсутвии оного
 DUMP_FOLDER = '/home/fedul0x/tmp/dumps'
+# DUMP_FOLDER = None
 
 # Файл базы данных
 DB_FILE = '/home/fedul0x/tmp/dumps/db.sqlite'

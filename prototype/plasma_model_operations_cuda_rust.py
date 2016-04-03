@@ -163,11 +163,11 @@ def main(prefix):
     z_range = np.linspace(0, Z_DIMENSION_GRID, Z_STEP_NUMBER_GRID + 1)
     n = (x_range.shape[0]-1) * (y_range.shape[0]-1) * (z_range.shape[0]-1)
     cpl = int(n/(x_range.shape[0] - 1))
-    # time, i, x, y, z, radius, charge, speedx, speedy, speedz
-    electron = np.empty([DATA_IN_MEMORY_TIME, n, 6+2])
+    # time, i, x, y, z, radius, charge, speedx, speedy, speedz, guid
+    electron = np.empty([DATA_IN_MEMORY_TIME, n, 6+2+1])
     carbon = \
-        np.empty([DATA_IN_MEMORY_TIME, CARBON_LAYERS_NUMBER*cpl, 6+2])
-    helium = np.empty([DATA_IN_MEMORY_TIME, n, 6+2])
+        np.empty([DATA_IN_MEMORY_TIME, CARBON_LAYERS_NUMBER*cpl, 6+2+1])
+    helium = np.empty([DATA_IN_MEMORY_TIME, n, 6+2+1])
     # Сразу крупные частицы
     num = 0  # номер частицы
     carbon_num = 0  # номер углерода
@@ -207,9 +207,9 @@ def main(prefix):
                         spread_position(cell, CARBONS_NUMBER)
                     x_speed, y_speed, z_speed = \
                         spread_speed(carbon_randomizer, dimensionless=csdu)
-                    for v, l in zip([0, y_big, z_big, big_carbon_radius, big_carbon_charge, x_speed, y_speed, z_speed], range(carbon.shape[2])):
+                    for v, l in zip([0, y_big, z_big, big_carbon_radius, big_carbon_charge, x_speed, y_speed, z_speed, carbon_num], range(carbon.shape[2])):
                         carbon[absolute_time][carbon_num][l] = v
-                    print(carbon_num, carbon[absolute_time][carbon_num])
+                    # print(carbon_num, carbon[absolute_time][carbon_num])
                     carbon_num += 1
         # Electron and helium distribution
         for y, j in zip(y_range[:-1], range(y_range.shape[0] - 1)):
@@ -220,13 +220,13 @@ def main(prefix):
                         spread_position(cell, ELECTRONS_NUMBER)
                     x_speed, y_speed, z_speed = \
                         spread_speed(electron_randomizer, dimensionless=esdu)
-                    for v, l in zip([x_big, y_big, z_big, big_electron_radius, big_electron_charge, x_speed, y_speed, z_speed], range(electron.shape[2])):
+                    for v, l in zip([x_big, y_big, z_big, big_electron_radius, big_electron_charge, x_speed, y_speed, z_speed, num], range(electron.shape[2])):
                         electron[absolute_time][num][l] = v
                     x_big, y_big, z_big = \
                         spread_position(cell, HELIUMS_NUMBER)
                     x_speed, y_speed, z_speed = \
                         spread_speed(helium_randomizer, dimensionless=hsdu)
-                    for v, l in zip([x_big, y_big, z_big, big_helium_radius, big_helium_charge, x_speed, y_speed, z_speed], range(helium.shape[2])):
+                    for v, l in zip([x_big, y_big, z_big, big_helium_radius, big_helium_charge, x_speed, y_speed, z_speed, num], range(helium.shape[2])):
                         helium[absolute_time][num][l] = v
                     num += 1
 
@@ -256,7 +256,7 @@ def main(prefix):
                 n = grid.shape
                 # print("SIZES {} carbons_in_process {}". format(size, carbons_in_process))
                 for num in range(size):
-                    x_big, y_big, z_big, _, charge, _, _, _ = position[curr_time][num]
+                    x_big, y_big, z_big, _, charge, _, _, _, _ = position[curr_time][num]
                     try:
                         i, j, k = \
                             int(x_big/X_STEP), int(y_big/Y_STEP), int(z_big/Z_STEP)
@@ -264,7 +264,7 @@ def main(prefix):
                         print('{}/{}, {}/{}, {}/{}'.format(x_big, X_STEP, y_big, Y_STEP, z_big, Z_STEP))
                     i, j, k = \
                         int(x_big/X_STEP), int(y_big/Y_STEP), int(z_big/Z_STEP)
-                    # Redistribution of carbon when it reaches the end of the simulation area
+                    # Carbon logging when it reaches the end of the simulation area
                     if name == 'carbon':
                         # print('Checking carbon num = {}'.format(num))
                         if (i<0) or (j<0) or (k<0) or (i>n[0]-2) or (j>n[1]-2) or (k>n[2]-2):
