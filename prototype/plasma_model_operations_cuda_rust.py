@@ -6,7 +6,6 @@ import shutil
 import scipy
 import scipy.stats
 from scipy.integrate import odeint
-import pickle
 import numpy as np
 from numpy.random import rand
 
