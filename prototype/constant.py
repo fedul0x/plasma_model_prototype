@@ -20,7 +20,7 @@ MODELING_TIME = 1200
 # Длинна истории
 DATA_IN_MEMORY_TIME = 3
 # Количество отрывающихся слоев углерода
-CARBON_LAYERS_NUMBER = 3
+CARBON_LAYERS_NUMBER = 20
 
 # Электростатическая постоянная (epsilon0)
 ELECTROSTATIC_CONSTANT = 8.8541878E-12

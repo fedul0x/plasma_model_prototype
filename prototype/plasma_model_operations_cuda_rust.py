@@ -64,8 +64,8 @@ def get_component(particle, b=0, n=3):
     return [particle[i] for i in range(b, b+n)]
 
 def get_collision_energy(part1, part2):
-    xc, yc, zc, radiusc, chrg, vcx, vcy, vcz = part1
-    xc2, yc2, zc2, radiusc2, chrg2, vcx2, vcy2, vcz2 = part2
+    xc, yc, zc, radiusc, chrg, vcx, vcy, vcz, _ = part1
+    xc2, yc2, zc2, radiusc2, chrg2, vcx2, vcy2, vcz2, _ = part2
     m1 = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
     m2 = CARBONS_MASS*radiusc2**3 / hi / CARBONS_RADIUS**3
     v1 = CARBON_SPEED_DIMENSIONLESS_UNIT*np.sqrt(vcx**2 + vcy**2 + vcz**2)
@@ -194,8 +194,10 @@ def main(prefix):
     is_dumped = True
     data = restore_from_dump(DUMP_FOLDER, CONSTANT_VALUES)
     if not (data is None):
+        print('dump')
         carbon, electron, helium, prev_phi, next_phi = data
     else:
+        print('not dump')
         # Carbon distribution
         is_dumped = False
         for _ in range(CARBON_LAYERS_NUMBER):
@@ -238,7 +240,7 @@ def main(prefix):
     constants = map(marshal, CONSTANT_VALUES.items())
     db_log = DbConnection(DB_FILE, '\n'.join(constants))
     try:
-        while (absolute_time < MODELING_TIME):
+        while (absolute_time < MODELING_TIME) and (carbons_in_process > 0):
             curr_time = p_time(absolute_time)
             # Charge in nodes calculations
             start = time.time()
@@ -367,8 +369,8 @@ def main(prefix):
                 offsets = []
                 for col in сarbon_collisions:
                     e1, e2 = get_collision_energy(carbon[curr_time][col[0]], carbon[curr_time][col[1]])
-                    xc, yc, zc, radiusc, chrg, vcx, vcy, vcz = carbon[curr_time][col[0]]
-                    xc2, yc2, zc2, radiusc2, chrg2, vcx2, vcy2, vcz2 = carbon[curr_time][col[1]]
+                    xc, yc, zc, radiusc, chrg, vcx, vcy, vcz, _ = carbon[curr_time][col[0]]
+                    xc2, yc2, zc2, radiusc2, chrg2, vcx2, vcy2, vcz2, _ = carbon[curr_time][col[1]]
                     m1 = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
                     m2 = CARBONS_MASS*radiusc2**3 / hi / CARBONS_RADIUS**3
                     # 348000
