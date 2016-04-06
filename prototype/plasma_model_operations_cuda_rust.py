@@ -16,6 +16,7 @@ from establishing_method import potential_establish_method_cuda as em
 from collision import *
 from dump import *
 
+__author__ = 'fedul0x'  
 
 def p_time(absolute_time):
     ''' pseuso time '''
@@ -234,6 +235,7 @@ def main(prefix):
     # MODELING CYCLE BEGIN
     num = 0  # number of particle
     absolute_time = 0  # absolute time
+    max_carbon_guid = carbon.shape[1]
     end = time.time()
     print('Particle distribution elapsed time = {}'.format(end-start))
     marshal = lambda x: '{} = {}'.format(x[0], x[1])
@@ -278,7 +280,7 @@ def main(prefix):
                     for p in patch:
                         grid[i+p[0]][j+p[1]][k+p[2]] += p[3]
             if offsets:
-                print('\n\nCIP = {} OFFSETS {}\n\n'.format(carbons_in_process, offsets))
+                # print('\n\nCIP = {} OFFSETS {}\n\n'.format(carbons_in_process, offsets))
                 db_log.new_final(carbon_final)
                 v1, v2 = min(offsets), min(offsets)
                 offset, i = 0, v1
@@ -286,7 +288,7 @@ def main(prefix):
                     while i+offset in offsets:
                         offset += 1
                     if i + offset < carbon.shape[1]:
-                        print('{} <= {}'.format(i, i+offset))
+                        # print('{} <= {}'.format(i, i+offset))
                         carbon[curr_time][i] = carbon[curr_time][i+offset]
                     i += 1
                 carbons_in_process -= len(offsets)
@@ -365,7 +367,7 @@ def main(prefix):
                 curr_time = p_time(absolute_time)
                 prev_time = p_prev_time(absolute_time)
                 сarbon_collisions = find_carbon_collision_rust(carbon, carbons_in_process, curr_time, prev_time)
-                print('сarbon_collisions = {}'.format(len(сarbon_collisions)))
+                # print('сarbon_collisions = {}'.format(len(сarbon_collisions)))
                 offsets = []
                 for col in сarbon_collisions:
                     e1, e2 = get_collision_energy(carbon[curr_time][col[0]], carbon[curr_time][col[1]])
@@ -398,10 +400,9 @@ def main(prefix):
                     # if e1 + e2 > 839000:
                     #     typeIII += [carbon[curr_time][b][0]]
                     #     continue
-                print('\n\n\n\n')
-                print('CARBONS_IN_PROCESS ================= {}'.format(carbons_in_process))
-                print('CIP = {} OFF = {}'.format(carbons_in_process, len(offsets)))
-                print
+                # print('\n\n\n\n')
+                # print('CARBONS_IN_PROCESS ================= {}'.format(carbons_in_process))
+                # print('CIP = {} OFF = {}'.format(carbons_in_process, len(offsets)))
                 if offsets:
                     v1, v2 = min(offsets), min(offsets)
                     offset, i = 0, v1
@@ -409,14 +410,16 @@ def main(prefix):
                         while i+offset in offsets:
                             offset += 1
                         if i + offset < carbon.shape[1]:
-                            print('{} <= {}'.format(i, i+offset))
+                            # print('{} <= {}'.format(i, i+offset))
                             carbon[curr_time][i] = carbon[curr_time][i+offset]
+                            carbon[curr_time][i][-1] = max_carbon_guid
+                            max_carbon_guid += 1
                         i += 1
                     carbons_in_process -= len(offsets)
-                print('CIP after deleting = {}'.format(carbons_in_process))
-                print(offsets)
-                print('CARBONS_IN_PROCESS ================= {}'.format(carbons_in_process))
-                print('\n\n\n\n')
+                # print('CIP after deleting = {}'.format(carbons_in_process))
+                # print(offsets)
+                # print('CARBONS_IN_PROCESS ================= {}'.format(carbons_in_process))
+                # print('\n\n\n\n')
 
 
 
