@@ -10,20 +10,10 @@ from constant import *
 
 __author__ = 'fedul0x'
 
-# X_DIMENSION_COLLISION = 100
-# Y_DIMENSION_COLLISION = 100
-# Z_DIMENSION_COLLISION = 100
-
-# X_STEP_COLLISION = X_DIMENSION_GRID / X_DIMENSION_COLLISION
-# Y_STEP_COLLISION = Y_DIMENSION_GRID / Y_DIMENSION_COLLISION
-# Z_STEP_COLLISION = Z_DIMENSION_GRID / Z_DIMENSION_COLLISION
-
 def find_carbon_collision_rust(particles, partnum, currtime, prevtime):
     curr_time = currtime
     prev_time = prevtime
-    # length = particles.shape[1]
     length = partnum
-    print('Length Length Length Length {}'.format(length))
     prev_data_x = (ctypes.c_double * length) (*[particles[prev_time][i][0] for i in range(partnum)])
     prev_data_y = (ctypes.c_double * length) (*[particles[prev_time][i][1] for i in range(partnum)])
     prev_data_z = (ctypes.c_double * length) (*[particles[prev_time][i][2] for i in range(partnum)])
@@ -44,13 +34,8 @@ def find_carbon_collision_rust(particles, partnum, currtime, prevtime):
     lib.find_carbon_clashes.argtypes = (dbl, dbl, dbl, dbl, dbl, dbl, dbl, szt, ctypes.c_double, szt, szt, szt, szt)
     lib.find_carbon_clashes.restype = Slice
     v = lib.find_carbon_clashes(prev_data_x, prev_data_y, prev_data_z, next_data_x, next_data_y, next_data_z, radiuses, length, TIME_STEP, step_num[0], step_num[1], step_num[2], thread_num)
-    # data = [v.ptr[i] for i in range(v.len)]
     data = [(v.ptr[i+0], v.ptr[i+1]) for i in range(0, v.len, 2)]
-    end = timer()            
-    # data_set = set(data)
-    # print("Thread num {}\tCubes {}\tLength {}\tSet length {}\tTime {}".format(thread_num, step_num**3, len(data)/2, len(data_set)/2, end-start))
 
-    # return [tuple(particles[curr_time][i[1]][:]) for i in data]
     return data
 
 
@@ -99,10 +84,6 @@ def find_collision_rust(parttype1, parttype2, currtime, prevtime):
     lib.my_func.restype = Slice
     v = lib.my_func(prev_data_1_x, prev_data_1_y, prev_data_1_z, next_data_1_x, next_data_1_y, next_data_1_z, length_1, radius_1, prev_data_2_x, prev_data_2_y, prev_data_2_z, next_data_2_x, next_data_2_y, next_data_2_z, length_2, radius_2, TIME_STEP)
     data = [(v.ptr[i+0], v.ptr[i+1]) for i in range(0, v.len, 2)]
-
-
-
-    
 
     return [tuple(parttype2[curr_time][i[1]][:]) for i in data]
 

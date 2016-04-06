@@ -94,7 +94,6 @@ class DbConnection:
             # TODO calc energy
             id1, id2, e = \
                 i[0]+self.particle_last_id, i[1]+self.particle_last_id, i[2]
-            # print(id1, id2, e)
             sql = '''insert into collision (id_iteration,
                 id_particle_1, id_particle_2, energy)
                 VALUES ({}, {}, {}, {})'''\

@@ -20,7 +20,7 @@ MODELING_TIME = 1200
 # Длинна истории
 DATA_IN_MEMORY_TIME = 3
 # Количество отрывающихся слоев углерода
-CARBON_LAYERS_NUMBER = 30
+CARBON_LAYERS_NUMBER = 20
 
 # Электростатическая постоянная (epsilon0)
 ELECTROSTATIC_CONSTANT = 8.8541878E-12
@@ -77,9 +77,9 @@ Y_DIMENSION_GRID = 1.0E-2
 Z_DIMENSION_GRID = 1.0E-2
 
 # Число шагов по сетке для крупных частиц
-X_STEP_NUMBER_GRID = 100
-Y_STEP_NUMBER_GRID = 100
-Z_STEP_NUMBER_GRID = 100
+X_STEP_NUMBER_GRID = 5
+Y_STEP_NUMBER_GRID = 5
+Z_STEP_NUMBER_GRID = 5
 
 # Шаг по сетке
 X_STEP = X_DIMENSION_GRID / X_STEP_NUMBER_GRID
@@ -100,28 +100,21 @@ POTENTIAL_BOUND_VALUE = 50
 ELECTRON_SPEED_DIMENSIONLESS_UNIT = 5.580192613E+5
 CARBON_SPEED_DIMENSIONLESS_UNIT = 3760.714995
 HELLIUM_SPEED_DIMENSIONLESS_UNIT = 1529.519939
-Mnue = 5.580192613E+5
-Mnuc = 3760.714995
-Mnuh = 1529.519939
 
 # Коэффициенты для перехода к безразмерному пространству
 SPACE_DIMENSIONLESS_UNIT = 2.211858553E-8
-Ml = 1.959711959E-8
 
 # Коэффициенты для перехода к безразмерной напряженности
 INTENSITY_DIMENSIONLESS_UNIT = 4.002386595E+7
-Mee = 4.517355103E+7
 
 # Метод установления (epsilon)
 ESTABLISHING_METHOD_ACCURACY = 0.01
 
+# TODO Что это? Убрать?
 Mt = 5.211008445E-12
 
 # Сплоченность мелких частиц внутри крупной
-hi = 0.7  # 0..1
+PARTICLE_COHESION = 0.7  # 0..1
 
-# CONSTANT_NAMES = [i for i in dir() if i.upper() == i]
-CONSTANT_NAMES = list(filter(lambda x: x.upper() == x, dir()))
-names = CONSTANT_NAMES
-# CONSTANT_VALUES = dict([(i, j) for i, j in globals().items() if i in CONSTANT_NAMES])
+names = list(filter(lambda x: x.upper() == x, dir()))
 CONSTANT_VALUES = dict(filter(lambda x: x[0] in names, globals().items()))

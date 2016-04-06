@@ -67,8 +67,8 @@ def get_component(particle, b=0, n=3):
 def get_collision_energy(part1, part2):
     xc, yc, zc, radiusc, chrg, vcx, vcy, vcz, _ = part1
     xc2, yc2, zc2, radiusc2, chrg2, vcx2, vcy2, vcz2, _ = part2
-    m1 = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
-    m2 = CARBONS_MASS*radiusc2**3 / hi / CARBONS_RADIUS**3
+    m1 = CARBONS_MASS*radiusc**3 / PARTICLE_COHESION / CARBONS_RADIUS**3
+    m2 = CARBONS_MASS*radiusc2**3 / PARTICLE_COHESION / CARBONS_RADIUS**3
     v1 = CARBON_SPEED_DIMENSIONLESS_UNIT*np.sqrt(vcx**2 + vcy**2 + vcz**2)
     v2 = CARBON_SPEED_DIMENSIONLESS_UNIT*np.sqrt(vcx2**2 + vcy2**2 + vcz2**2)
     e1 = m1 * v1**2 / 2 / CARBONS_NUMBER * AVOGADRO_CONSTANT
@@ -156,7 +156,7 @@ def dif(x, y, z, step):
     return (x - 2 * y + z) / step ** 2
 
 
-def main(prefix):
+def main():
     # Границы сетки
     x_range = np.linspace(0, X_DIMENSION_GRID, X_STEP_NUMBER_GRID + 1)
     y_range = np.linspace(0, Y_DIMENSION_GRID, Y_STEP_NUMBER_GRID + 1)
@@ -169,36 +169,37 @@ def main(prefix):
         np.empty([DATA_IN_MEMORY_TIME, CARBON_LAYERS_NUMBER*cpl, 6+2+1])
     helium = np.empty([DATA_IN_MEMORY_TIME, n, 6+2+1])
     # Сразу крупные частицы
-    num = 0  # номер частицы
-    carbon_num = 0  # номер углерода
+    num = 0  # particle number
+    carbon_num = 0  # carbon number
     carbons_in_process = cpl  # carbon particles across layers
-    absolute_time = 0  # позиция по временной шкале
+    absolute_time = 0  # time scale position
     # TODO оптимизировать получения случвела Максвелла
-    # print('Particle distribution')
+
     start = time.time()
-    electron_randomizer = MWranomizer(n=1, m=ELECTRONS_MASS, T=TEMPERATURE)
-    carbon_randomizer = MWranomizer(n=1, m=CARBONS_MASS, T=TEMPERATURE)
-    helium_randomizer = MWranomizer(n=1, m=HELIUMS_MASS, T=HELIUMS_TEMPERATURE)
     csdu, esdu, hsdu = CARBON_SPEED_DIMENSIONLESS_UNIT, \
         ELECTRON_SPEED_DIMENSIONLESS_UNIT, HELLIUM_SPEED_DIMENSIONLESS_UNIT
     big_carbon_radius = \
-        (hi * CARBONS_RADIUS ** 3 * CARBONS_NUMBER) ** (1.0 / 3.0)
+        (PARTICLE_COHESION * CARBONS_RADIUS ** 3 * CARBONS_NUMBER) ** (1.0 / 3.0)
     big_carbon_charge = CARBONS_CHARGE * CARBONS_NUMBER
     big_electron_radius = \
-        (hi * ELECTRONS_RADIUS ** 3 * ELECTRONS_NUMBER)**(1.0 / 3.0)
+        (PARTICLE_COHESION * ELECTRONS_RADIUS ** 3 * ELECTRONS_NUMBER)**(1.0 / 3.0)
     big_electron_charge = ELECTRONS_CHARGE * ELECTRONS_NUMBER
     big_helium_radius = \
-        (hi * HELIUMS_RADIUS ** 3 * HELIUMS_NUMBER) ** (1.0 / 3.0)
+        (PARTICLE_COHESION * HELIUMS_RADIUS ** 3 * HELIUMS_NUMBER) ** (1.0 / 3.0)
     big_helium_charge = HELIUMS_CHARGE * HELIUMS_NUMBER
     prev_phi, next_phi = [], []
     # Restore from dump particles and potential field
     is_dumped = True
     data = restore_from_dump(DUMP_FOLDER, CONSTANT_VALUES)
     if not (data is None):
-        print('dump')
+        print('Resore from dump')
         carbon, electron, helium, prev_phi, next_phi = data
+        print('Particle distribution extraction from dump elapsed time = {}'.format(time.time()-start))
     else:
-        print('not dump')
+        print('Particle distribution generation')
+        electron_randomizer = MWranomizer(n=1, m=ELECTRONS_MASS, T=TEMPERATURE)
+        carbon_randomizer = MWranomizer(n=1, m=CARBONS_MASS, T=TEMPERATURE)
+        helium_randomizer = MWranomizer(n=1, m=HELIUMS_MASS, T=HELIUMS_TEMPERATURE)
         # Carbon distribution
         is_dumped = False
         for _ in range(CARBON_LAYERS_NUMBER):
@@ -211,7 +212,6 @@ def main(prefix):
                         spread_speed(carbon_randomizer, dimensionless=csdu)
                     for v, l in zip([0, y_big, z_big, big_carbon_radius, big_carbon_charge, x_speed, y_speed, z_speed, carbon_num], range(carbon.shape[2])):
                         carbon[absolute_time][carbon_num][l] = v
-                    # print(carbon_num, carbon[absolute_time][carbon_num])
                     carbon_num += 1
         # Electron and helium distribution
         for y, j in zip(y_range[:-1], range(y_range.shape[0] - 1)):
@@ -231,13 +231,12 @@ def main(prefix):
                     for v, l in zip([x_big, y_big, z_big, big_helium_radius, big_helium_charge, x_speed, y_speed, z_speed, num], range(helium.shape[2])):
                         helium[absolute_time][num][l] = v
                     num += 1
+        print('Particle distribution elapsed time = {}'.format(time.time()-start))
 
     # MODELING CYCLE BEGIN
     num = 0  # number of particle
-    absolute_time = 0  # absolute time
+    absolute_time = 0  # time scale position
     max_carbon_guid = carbon.shape[1]
-    end = time.time()
-    print('Particle distribution elapsed time = {}'.format(end-start))
     marshal = lambda x: '{} = {}'.format(x[0], x[1])
     constants = map(marshal, CONSTANT_VALUES.items())
     db_log = DbConnection(DB_FILE, '\n'.join(constants))
@@ -257,7 +256,6 @@ def main(prefix):
             offsets, carbon_final = [], []
             for grid, position, name, size in zip(grids, positions, names, sizes):
                 n = grid.shape
-                # print("SIZES {} carbons_in_process {}". format(size, carbons_in_process))
                 for num in range(size):
                     x_big, y_big, z_big, _, charge, _, _, _, _ = position[curr_time][num]
                     try:
@@ -269,7 +267,6 @@ def main(prefix):
                         int(x_big/X_STEP), int(y_big/Y_STEP), int(z_big/Z_STEP)
                     # Carbon logging when it reaches the end of the simulation area
                     if name == 'carbon':
-                        # print('Checking carbon num = {}'.format(num))
                         if (i<0) or (j<0) or (k<0) or (i>n[0]-2) or (j>n[1]-2) or (k>n[2]-2):
                             offsets += [num]
                             carbon_final += [position[curr_time][num]]
@@ -280,15 +277,13 @@ def main(prefix):
                     for p in patch:
                         grid[i+p[0]][j+p[1]][k+p[2]] += p[3]
             if offsets:
-                # print('\n\nCIP = {} OFFSETS {}\n\n'.format(carbons_in_process, offsets))
                 db_log.new_final(carbon_final)
                 v1, v2 = min(offsets), min(offsets)
                 offset, i = 0, v1
-                while i < carbon.shape[1]:  # for i in range(v1, v2):
+                while i < carbon.shape[1]:
                     while i+offset in offsets:
                         offset += 1
                     if i + offset < carbon.shape[1]:
-                        # print('{} <= {}'.format(i, i+offset))
                         carbon[curr_time][i] = carbon[curr_time][i+offset]
                     i += 1
                 carbons_in_process -= len(offsets)
@@ -339,7 +334,7 @@ def main(prefix):
                         inten[2] += [(intensity[i-1][j-1][k-1] [2], next_phi[i][j][k - 1], next_phi[i][j][k + 1])]
             end = time.time()
             print('Intensity calcing elapsed time = {}'.format(end-start))
-            # Расчет напряженности действующей на частицу
+            # Calcing tension by each particle
             start = time.time()
             electron_tension = np.empty([electron.shape[1], 3])
             carbon_tension = np.empty([carbons_in_process, 3])
@@ -348,7 +343,6 @@ def main(prefix):
             sizes = [electron.shape[1], carbons_in_process, helium.shape[1]]
             tensions = [electron_tension, carbon_tension, helium_tension]
             for position, p, size in zip(particles, range(len(tensions)), sizes):
-                # n = position.shape
                 for num in range(size):
                     x_big, y_big, z_big = \
                         get_component(position[curr_time][num])
@@ -367,17 +361,15 @@ def main(prefix):
                 curr_time = p_time(absolute_time)
                 prev_time = p_prev_time(absolute_time)
                 сarbon_collisions = find_carbon_collision_rust(carbon, carbons_in_process, curr_time, prev_time)
-                # print('сarbon_collisions = {}'.format(len(сarbon_collisions)))
                 offsets = []
                 for col in сarbon_collisions:
                     e1, e2 = get_collision_energy(carbon[curr_time][col[0]], carbon[curr_time][col[1]])
                     xc, yc, zc, radiusc, chrg, vcx, vcy, vcz, _ = carbon[curr_time][col[0]]
                     xc2, yc2, zc2, radiusc2, chrg2, vcx2, vcy2, vcz2, _ = carbon[curr_time][col[1]]
-                    m1 = CARBONS_MASS*radiusc**3 / hi / CARBONS_RADIUS**3
-                    m2 = CARBONS_MASS*radiusc2**3 / hi / CARBONS_RADIUS**3
-                    # 348000
-                    if e1 + e2 > 348000: ###################################
-                        r = (((m1 + m2) * hi * CARBONS_RADIUS**3) / CARBONS_MASS)**(1.0/3)
+                    m1 = CARBONS_MASS*radiusc**3 / PARTICLE_COHESION / CARBONS_RADIUS**3
+                    m2 = CARBONS_MASS*radiusc2**3 / PARTICLE_COHESION / CARBONS_RADIUS**3
+                    if e1 + e2 > 348000:
+                        r = (((m1 + m2) * PARTICLE_COHESION * CARBONS_RADIUS**3) / CARBONS_MASS)**(1.0/3)
                         carbon[curr_time][col[0]][3] = r
                         carbon[curr_time][col[0]][4] = chrg + chrg2
                         carbon[curr_time][col[0]][5] = vcx + vcx2
@@ -392,39 +384,18 @@ def main(prefix):
                         carbon[curr_time][col[1]][5] = vcx
                         carbon[curr_time][col[1]][6] = vcy
                         carbon[curr_time][col[1]][7] = vcz
-                    # 614000
-                    # if e1 + e2 > 614000:
-                    #     typeII += [carbon[curr_time][b][0]]
-                    #     continue
-                    # 839000
-                    # if e1 + e2 > 839000:
-                    #     typeIII += [carbon[curr_time][b][0]]
-                    #     continue
-                # print('\n\n\n\n')
-                # print('CARBONS_IN_PROCESS ================= {}'.format(carbons_in_process))
-                # print('CIP = {} OFF = {}'.format(carbons_in_process, len(offsets)))
                 if offsets:
                     v1, v2 = min(offsets), min(offsets)
                     offset, i = 0, v1
-                    while i < carbon.shape[1]:  # for i in range(v1, v2):
+                    while i < carbon.shape[1]:
                         while i+offset in offsets:
                             offset += 1
                         if i + offset < carbon.shape[1]:
-                            # print('{} <= {}'.format(i, i+offset))
                             carbon[curr_time][i] = carbon[curr_time][i+offset]
                             carbon[curr_time][i][-1] = max_carbon_guid
                             max_carbon_guid += 1
                         i += 1
                     carbons_in_process -= len(offsets)
-                # print('CIP after deleting = {}'.format(carbons_in_process))
-                # print(offsets)
-                # print('CARBONS_IN_PROCESS ================= {}'.format(carbons_in_process))
-                # print('\n\n\n\n')
-
-
-
-                # electron_collisions = find_collision_rust(carbon, electron, curr_time, prev_time)
-                # helium_collisions   = find_collision_rust(carbon, helium, curr_time, prev_time)
             end = time.time()
             print('Collisions finding elapsed time = {}'.format(end-start))
             # Solutions of differential equations
@@ -501,25 +472,6 @@ def main(prefix):
         print('OSError')
         pass
 
-def make_dir_prefix():
-    prefix = './picts/picts_cuda_{}'.format(time.strftime('%Y%m%d%H%M%S'))
-    try:
-        os.mkdir(prefix)
-    except:
-        pass
-    shutil.copy('./constant.py', prefix)
-    return prefix
-
-
-def make_dir(prefix, dir_name):
-    path = os.path.join(prefix, dir_name)
-    try:
-        os.mkdir(path)
-    except:
-        pass
-    return path
-
 
 if __name__ == '__main__':
-    prefix = make_dir_prefix()
-    main(prefix)
+    main()
