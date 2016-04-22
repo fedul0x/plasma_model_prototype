@@ -97,7 +97,7 @@ def spread_position(center, number):
 
 def spread_speed(randomizer, dimensionless=1):
     speed = randomizer.rvs(size=1)[0]/dimensionless
-    mu, sigma = 0, np.pi/30
+    mu, sigma = 0, SPEED_DISTRIBUTION_ANGLE_SIGMA
     angle = np.random.normal(mu, sigma, 2)
     angle[1] = angle[1] + np.pi/2
     x_speed = speed*np.cos(angle[0])

@@ -30,7 +30,8 @@ def restore_from_dump(dumpfolder, conds):
         consts = pickle.load(dump_file)
 
         def check(x):
-            if conds.get(x[0], None) is None:
+            if conds.get(x[0], None) is None or\
+            x[0] == 'TIME_STEP':
                 return True
             else:
                 return x[1] == conds[x[0]]

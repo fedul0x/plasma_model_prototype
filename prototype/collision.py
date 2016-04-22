@@ -29,7 +29,7 @@ def find_carbon_collision_rust(particles, partnum, currtime, prevtime):
     dbl = ctypes.POINTER(ctypes.c_double)
     szt = ctypes.c_size_t
     start = timer()
-    step_num = (3, 3, 3, )
+    step_num = (5, 5, 5, )
     thread_num = 3
     lib.find_carbon_clashes.argtypes = (dbl, dbl, dbl, dbl, dbl, dbl, dbl, szt, ctypes.c_double, szt, szt, szt, szt)
     lib.find_carbon_clashes.restype = Slice
