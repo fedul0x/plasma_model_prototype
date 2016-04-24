@@ -238,7 +238,8 @@ def main():
     absolute_time = 0  # time scale position
     max_carbon_guid = carbon.shape[1]
     marshal = lambda x: '{} = {}'.format(x[0], x[1])
-    constants = map(marshal, CONSTANT_VALUES.items())
+    constkeys = sorted(CONSTANT_VALUES.items())
+    constants = map(marshal, constkeys)
     db_log = DbConnection(DB_FILE, '\n'.join(constants))
     try:
         while (absolute_time < MODELING_TIME) and (carbons_in_process > 0):
