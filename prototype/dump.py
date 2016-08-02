@@ -78,16 +78,19 @@ class DbConnection:
         self.connection.commit()
         self.iteration_last_id = self.cursor.execute('select max(id) from iteration').fetchone()[0]
 
-    def new_particle(self, carbon, currtime, carbonum):
+    def new_particle(self, carbon, tension, currtime, carbonum):
         for i in range(carbonum):
             c = ', '.join([str(carbon[currtime][i][j]) for j in range(9)])
+            t = ', '.join([str(tension[i][j]) for j in range(3)])
             sql = '''insert into particle (id_iteration, pos_x, pos_y, pos_z,
-                radius, charge, speed_x, speed_y, speed_z, guid)
-                VALUES ({}, {})'''\
-                .format(self.iteration_last_id, c)
+                radius, charge, speed_x, speed_y, speed_z, guid,
+                tension_x, tension_y, tension_z)
+                VALUES ({}, {}, {})'''\
+                .format(self.iteration_last_id, c, t)
             self.cursor.execute(sql)
         self.connection.commit()
-        self.particle_last_id = self.cursor.execute('select max(id) from particle').fetchone()[0]
+        sql = 'select max(id) from particle'
+        self.particle_last_id = self.cursor.execute(sql).fetchone()[0]
 
     def new_collision(self, collisions):
         for i in collisions:
@@ -102,12 +105,14 @@ class DbConnection:
             self.cursor.execute(sql)
         self.connection.commit()
 
-    def new_final(self, carbons):
-        for i in carbons:
-            c = ', '.join([str(i[j]) for j in range(9)])
+    def new_final(self, carbons, tension):
+        for i in range(len(carbons)):
+            c = ', '.join([str(carbons[i][j]) for j in range(9)])
+            t = ', '.join([str(tension[i][j]) for j in range(3)])
             sql = '''insert into final (id_iteration, pos_x, pos_y, pos_z,
-                radius, charge, speed_x, speed_y, speed_z, guid)
-                VALUES ({}, {})'''\
-                .format(self.iteration_last_id, c)
+                radius, charge, speed_x, speed_y, speed_z, guid,
+                tension_x, tension_y, tension_z)
+                VALUES ({}, {}, {})'''\
+                .format(self.iteration_last_id, c, t)
             self.cursor.execute(sql)
         self.connection.commit()

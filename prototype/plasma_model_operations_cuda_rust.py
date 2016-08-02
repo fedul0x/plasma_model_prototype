@@ -254,7 +254,7 @@ def main():
             sizes = [electron.shape[1], carbons_in_process, helium.shape[1]]
             grids = [electron_charge_grid, carbon_charge_grid, helium_charge_grid]
             names = ['electron', 'carbon', 'helium']
-            offsets, carbon_final = [], []
+            offsets, carbon_final, tension_final = [], [], []
             for grid, position, name, size in zip(grids, positions, names, sizes):
                 n = grid.shape
                 for num in range(size):
@@ -271,6 +271,7 @@ def main():
                         if (i<0) or (j<0) or (k<0) or (i>n[0]-2) or (j>n[1]-2) or (k>n[2]-2):
                             offsets += [num]
                             carbon_final += [position[curr_time][num]]
+                            tension_final += [carbon_tension[num]]
                             continue
                     x, y, z = \
                         i*X_STEP, j*Y_STEP, k*Z_STEP
@@ -278,7 +279,7 @@ def main():
                     for p in patch:
                         grid[i+p[0]][j+p[1]][k+p[2]] += p[3]
             if offsets:
-                db_log.new_final(carbon_final)
+                db_log.new_final(carbon_final, tension_final)
                 v1, v2 = min(offsets), min(offsets)
                 offset, i = 0, v1
                 while i < carbon.shape[1]:
@@ -312,6 +313,7 @@ def main():
             ema = ESTABLISHING_METHOD_ACCURACY
             prev_phi, next_phi = \
                 em(prev_phi, next_phi, ro, epsilon=ema)
+            # make_potential_plot_file('./picts/', next_phi, curr_time)
             # Dump particles and potential field
             if not is_dumped:
                 data = (carbon, electron, helium, prev_phi, next_phi)
@@ -334,6 +336,7 @@ def main():
                         inten[1] += [(intensity[i-1][j-1][k-1][1], next_phi[i][j - 1][k], next_phi[i][j + 1][k])]
                         inten[2] += [(intensity[i-1][j-1][k-1] [2], next_phi[i][j][k - 1], next_phi[i][j][k + 1])]
             end = time.time()
+            make_inten_plot_file('./picts/', inten, absolute_time)
             print('Intensity calcing elapsed time = {}'.format(end-start))
             # Calcing tension by each particle
             start = time.time()
@@ -353,6 +356,7 @@ def main():
                     tension = spread_tension((x, y, z), (x_big, y_big, z_big), intensity)
                     for t in range(3):
                         tensions[p][num][t] = tension[t]
+            make_tension_plot_file('./picts/', carbon_tension, absolute_time)
             end = time.time()
             print('Tension by particle calcing elapsed time = {}'.format(end-start))
             
@@ -397,6 +401,7 @@ def main():
                             max_carbon_guid += 1
                         i += 1
                     carbons_in_process -= len(offsets)
+                    print('offsets: {}'.format(len(offsets)))
             end = time.time()
             print('Collisions finding elapsed time = {}'.format(end-start))
             # Solutions of differential equations
@@ -448,7 +453,7 @@ def main():
             end = time.time()
             print('Differential equations solution elapsed time = {}'.format(end-start))
             db_log.new_iteration(absolute_time*TIME_STEP)
-            db_log.new_particle(carbon, curr_time, carbons_in_process)
+            db_log.new_particle(carbon, carbon_tension, curr_time, carbons_in_process)
 
             def enrg(x):
                 p1 = carbon[curr_time][x[0]]

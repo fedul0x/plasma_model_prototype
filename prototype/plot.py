@@ -185,7 +185,7 @@ def make_potential_plot_file(prefix, next_phi, time):
         for i in range(n[0]):
             for j in range(n[1]):
                 plot_phi[i][j] = next_phi[i][j][k]
-        plt.contourf(plot_phi.T)
+        plt.contourf(plot_phi.T, levels=[140*i/100.0 for i in range(101)])
         plt.colorbar()
         plt.savefig("{}/phi_time={:04d}_z={:02d}".format(directory, time, k))
         plt.clf()
@@ -229,6 +229,7 @@ def make_tension_plot_file(prefix, tension, time):
     ax3.plot(plot_tension_z)
     plt.savefig("{}/tension_by_x_y_z_time={:04d}".format(directory, time))
     plt.clf()
+    plt.close(fig)
 
     plt.plot(plot_tension)
     plt.savefig("{}/tension_by_sum(x,y,z)_time={:04d}".format(directory, time))

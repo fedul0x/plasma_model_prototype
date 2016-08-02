@@ -60,7 +60,8 @@ ANODE_BURNING_SPEED = 0.44E-5
 TEMPERATURE = 4200
 HELIUMS_TEMPERATURE = 293
 
-AMPERAGE = 150
+# AMPERAGE = 150
+AMPERAGE = 400
 
 # Параметры распределения скорости по Максвеллу
 ELECTRONS_MAX_SPEED = np.sqrt(2*BOLTZMANN_CONSTANT*TEMPERATURE/ELECTRONS_MASS)
@@ -71,7 +72,7 @@ HELIUMS_DELTA_SPEED = 0.1*HELIUMS_MAX_SPEED
 CARBONS_MAX_SPEED = np.sqrt(2*BOLTZMANN_CONSTANT*TEMPERATURE/CARBONS_MASS)
 CARBONS_DELTA_SPEED = 0.1*CARBONS_MAX_SPEED
 # Дисперсия угла при распределении скорости по компонентам
-SPEED_DISTRIBUTION_ANGLE_SIGMA = np.pi/10
+SPEED_DISTRIBUTION_ANGLE_SIGMA = np.pi/30
 
 # Размеры сетки
 X_DIMENSION_GRID = 1.0E-3
@@ -96,7 +97,7 @@ while (sum(map(lambda step: FAKE_TIME_STEP/step**2, STEPS)) > 0.5):
 
 
 # Начальное значение потенциала
-POTENTIAL_BOUND_VALUE = 50
+POTENTIAL_BOUND_VALUE = 140
 
 # Коэффициенты скорости для перехода к безразмерным величинам
 ELECTRON_SPEED_DIMENSIONLESS_UNIT = 5.580192613E+5
@@ -116,7 +117,7 @@ ESTABLISHING_METHOD_ACCURACY = 0.01
 Mt = 5.211008445E-12
 
 # Сплоченность мелких частиц внутри крупной
-PARTICLE_COHESION = 0.7  # 0..1
+PARTICLE_COHESION = 2.0  # 0..1
 
 names = list(filter(lambda x: x.upper() == x, dir()))
 CONSTANT_VALUES = dict(filter(lambda x: x[0] in names, globals().items()))
