@@ -95,6 +95,22 @@ def spread_position(center, number):
         big_pos += [np.random.normal(loc=p + step/2, scale=(step/6)**2)]
     return big_pos
 
+def spread_carbon_position(center, number):
+    # x, y, z, = center
+    # x_big, y_big, z_big = 0, 0, 0
+    # for _ in range(int(number)):
+    #     x_big += x + rand() * X_STEP
+    #     y_big += y + rand() * Y_STEP
+    #     z_big += z + rand() * Z_STEP
+    # return x_big/number, y_big/number, z_big/number
+    x, y, z, = center
+    p, step = center[0], X_STEP*25
+    big_pos = [np.abs(np.random.normal(loc=p + step/2, scale=(step*30)**2))]
+    # print('carbon x = {} < {}*25 = {}'.format(big_pos[0], X_STEP, X_STEP*25))
+    for p, step in zip(center[1:], (Y_STEP, Z_STEP,)):
+        big_pos += [np.random.normal(loc=p + step/2, scale=(step/6)**2)]
+    return big_pos
+
 def spread_speed(randomizer, dimensionless=1):
     speed = randomizer.rvs(size=1)[0]/dimensionless
     mu, sigma = 0, SPEED_DISTRIBUTION_ANGLE_SIGMA
@@ -205,12 +221,12 @@ def main():
         for _ in range(CARBON_LAYERS_NUMBER):
             for y, j in zip(y_range[:-1], range(y_range.shape[0] - 1)):
                 for z, k in zip(z_range[:-1], range(z_range.shape[0] - 1)):
-                    cell = (0, y, z)
+                    cell = (x_range[:-1][0]*25, y, z)
                     x_big, y_big, z_big = \
-                        spread_position(cell, CARBONS_NUMBER)
+                        spread_carbon_position(cell, CARBONS_NUMBER)
                     x_speed, y_speed, z_speed = \
                         spread_speed(carbon_randomizer, dimensionless=csdu)
-                    for v, l in zip([0, y_big, z_big, big_carbon_radius, big_carbon_charge, x_speed, y_speed, z_speed, carbon_num], range(carbon.shape[2])):
+                    for v, l in zip([x_big, y_big, z_big, big_carbon_radius, big_carbon_charge, x_speed, y_speed, z_speed, carbon_num], range(carbon.shape[2])):
                         carbon[absolute_time][carbon_num][l] = v
                     carbon_num += 1
         # Electron and helium distribution
@@ -299,6 +315,7 @@ def main():
             ecg, ccg, hcg = \
                 electron_charge_grid, carbon_charge_grid, helium_charge_grid
             # TODO easying
+            start2 = time.time()
             if FAST_ESTABLISHING_METHOD:
                 if prev_phi == [] and next_phi == []:
                     prev_phi, next_phi, ro = \
@@ -309,6 +326,8 @@ def main():
             else:
                 prev_phi, next_phi, ro = \
                     make_boundary_conditions(phi, n, ecg, ccg, hcg)
+            end2 = time.time()
+            print('Preparation elapsed time = {}'.format(end2-start2))
             # Potential establish method
             ema = ESTABLISHING_METHOD_ACCURACY
             prev_phi, next_phi = \
@@ -321,7 +340,6 @@ def main():
                 is_dumped = True
             end = time.time()
             print('Establishing method elapsed time = {}'.format(end-start))
-            # Calculation of tension
             start = time.time()
             n = next_phi.shape
             intensity = np.zeros([n[0]-2, n[1]-2, n[2]-2, 3])
@@ -481,3 +499,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+            # Calculation of tension
