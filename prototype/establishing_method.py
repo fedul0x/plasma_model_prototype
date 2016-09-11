@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import time
 import pycuda.driver as drv
 import pycuda.autoinit
 from pycuda.compiler import SourceModule
@@ -77,10 +78,13 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
     # print('gd={}, bd = {} ===================='.format(gd, bd))
     # print('sizes={}'.format(sizes))
 
+    start = time.time()
     prev_phi_gpu = drv.mem_alloc((prev_phi.size) * prev_phi.dtype.itemsize)
     next_phi_gpu = drv.mem_alloc((next_phi.size) * next_phi.dtype.itemsize)
     drv.memcpy_htod(prev_phi_gpu, prev_phi)
     drv.memcpy_htod(next_phi_gpu, next_phi)
+    end = time.time()
+    print('Send to device elapsed time = {}'.format(end-start))
 
     subSum = np.zeros((gd, ), dtype=np.float32)
     ssum = 4 * epsilon
@@ -100,9 +104,13 @@ def potential_establish_method_cuda(prev_phi, next_phi, ro, epsilon=0.01):
         ssum = 0
         for s in subSum:
             ssum += s
+
+    start = time.time()
     drv.memcpy_dtoh(prev_phi, prev_phi_gpu)
     drv.memcpy_dtoh(next_phi, next_phi_gpu)
     prev_phi_gpu.free()
     next_phi_gpu.free()
+    end = time.time()
+    print('Recieve from device elapsed time = {}'.format(end-start))
 
     return (prev_phi, next_phi)
