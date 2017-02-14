@@ -31,7 +31,7 @@ def restore_from_dump(dumpfolder, conds):
 
         def check(x):
             if conds.get(x[0], None) is None or\
-            x[0] == 'TIME_STEP':
+            x[0] == 'TIME_STEP' or x[0] == 'DB_FILE' or x[0] == 'DUMP_FOLDER':
                 return True
             else:
                 return x[1] == conds[x[0]]
