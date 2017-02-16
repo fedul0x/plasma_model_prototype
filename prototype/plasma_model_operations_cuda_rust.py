@@ -104,9 +104,9 @@ def spread_carbon_position(center, number):
     #     z_big += z + rand() * Z_STEP
     # return x_big/number, y_big/number, z_big/number
     x, y, z, = center
-    p, step = center[0], X_STEP*25
+    p, step = center[0], X_STEP*X_STEP_NUMBER_GRID/4
     big_pos = [np.abs(np.random.normal(loc=p + step/2, scale=(step*30)**2))]
-    # print('carbon x = {} < {}*25 = {}'.format(big_pos[0], X_STEP, X_STEP*25))
+    # print('carbon x = {} < {}*25 = {}'.format(big_pos[0], X_STEP, X_STEP**X_STEP_NUMBER_GRID/4))
     for p, step in zip(center[1:], (Y_STEP, Z_STEP,)):
         big_pos += [np.random.normal(loc=p + step/2, scale=(step/6)**2)]
     return big_pos
@@ -270,7 +270,7 @@ def main():
             sizes = [electron.shape[1], carbons_in_process, helium.shape[1]]
             grids = [electron_charge_grid, carbon_charge_grid, helium_charge_grid]
             names = ['electron', 'carbon', 'helium']
-            offsets, carbon_final, tension_final = [], [], []
+            carbon_final, tension_final = [], []
             for grid, position, name, size in zip(grids, positions, names, sizes):
                 n = grid.shape
                 for num in range(size):
@@ -285,26 +285,12 @@ def main():
                     # Carbon logging when it reaches the end of the simulation area
                     if name == 'carbon':
                         if (i<0) or (j<0) or (k<0) or (i>n[0]-2) or (j>n[1]-2) or (k>n[2]-2):
-                            offsets += [num]
-                            carbon_final += [position[curr_time][num]]
-                            tension_final += [carbon_tension[num]]
                             continue
                     x, y, z = \
                         i*X_STEP, j*Y_STEP, k*Z_STEP
                     patch = spread_charge((x, y, z), (x_big, y_big, z_big), charge)
                     for p in patch:
                         grid[i+p[0]][j+p[1]][k+p[2]] += p[3]
-            if offsets:
-                db_log.new_final(carbon_final, tension_final)
-                v1, v2 = min(offsets), min(offsets)
-                offset, i = 0, v1
-                while i < carbon.shape[1]:
-                    while i+offset in offsets:
-                        offset += 1
-                    if i + offset < carbon.shape[1]:
-                        carbon[curr_time][i] = carbon[curr_time][i+offset]
-                    i += 1
-                carbons_in_process -= len(offsets)
             end = time.time()
             print('Calcing charge in cells elapsed time = {}'.format(end-start))
 
@@ -328,6 +314,7 @@ def main():
                     make_boundary_conditions(phi, n, ecg, ccg, hcg)
             end2 = time.time()
             print('Preparation elapsed time = {}'.format(end2-start2))
+            
             # Potential establish method
             ema = ESTABLISHING_METHOD_ACCURACY
             prev_phi, next_phi = \
@@ -339,6 +326,7 @@ def main():
                 save_to_dump(DUMP_FOLDER, CONSTANT_VALUES, data)
                 is_dumped = True
             end = time.time()
+            # make_potential_plot_file('./picts/', next_phi, absolute_time)
             print('Establishing method elapsed time = {}'.format(end-start))
             start = time.time()
             n = next_phi.shape
@@ -354,7 +342,7 @@ def main():
                         inten[1] += [(intensity[i-1][j-1][k-1][1], next_phi[i][j - 1][k], next_phi[i][j + 1][k])]
                         inten[2] += [(intensity[i-1][j-1][k-1] [2], next_phi[i][j][k - 1], next_phi[i][j][k + 1])]
             end = time.time()
-            make_inten_plot_file('./picts/', inten, absolute_time)
+            # make_inten_plot_file('./picts/', inten, absolute_time)
             print('Intensity calcing elapsed time = {}'.format(end-start))
             # Calcing tension by each particle
             start = time.time()
@@ -371,57 +359,21 @@ def main():
                     i, j, k = \
                         int(x_big/X_STEP), int(y_big/Y_STEP), int(z_big/Z_STEP)
                     x, y, z = i*X_STEP, j*Y_STEP, k*Z_STEP
-                    tension = spread_tension((x, y, z), (x_big, y_big, z_big), intensity)
+
+                    # print('x_big, y_big, z_big = {}, {}, {}'.format(x_big, y_big, z_big))
+                    # print('i, j, k = {}, {}, {}'.format(i, j, k))
+                    # print('x, y, z = {}, {}, {}'.format(x, y, z))
+                    try:
+                        tension = spread_tension((x, y, z), (x_big, y_big, z_big), intensity)
+                    except:
+                        print(num)
+                        return
                     for t in range(3):
                         tensions[p][num][t] = tension[t]
-            make_tension_plot_file('./picts/', carbon_tension, absolute_time)
+            # make_tension_plot_file('./picts/', carbon_tension, absolute_time)
             end = time.time()
             print('Tension by particle calcing elapsed time = {}'.format(end-start))
             
-            start = time.time()
-            сarbon_collisions, electron_collisions, helium_collisions = [], [], []
-            if absolute_time != 0:
-                curr_time = p_time(absolute_time)
-                prev_time = p_prev_time(absolute_time)
-                сarbon_collisions = find_carbon_collision_rust(carbon, carbons_in_process, curr_time, prev_time)
-                offsets = []
-                for col in сarbon_collisions:
-                    e1, e2 = get_collision_energy(carbon[curr_time][col[0]], carbon[curr_time][col[1]])
-                    xc, yc, zc, radiusc, chrg, vcx, vcy, vcz, _ = carbon[curr_time][col[0]]
-                    xc2, yc2, zc2, radiusc2, chrg2, vcx2, vcy2, vcz2, _ = carbon[curr_time][col[1]]
-                    m1 = CARBONS_MASS*radiusc**3 / PARTICLE_COHESION / CARBONS_RADIUS**3
-                    m2 = CARBONS_MASS*radiusc2**3 / PARTICLE_COHESION / CARBONS_RADIUS**3
-                    if e1 + e2 > 348000:
-                        r = (((m1 + m2) * PARTICLE_COHESION * CARBONS_RADIUS**3) / CARBONS_MASS)**(1.0/3)
-                        carbon[curr_time][col[0]][3] = r
-                        carbon[curr_time][col[0]][4] = chrg + chrg2
-                        carbon[curr_time][col[0]][5] = vcx + vcx2
-                        carbon[curr_time][col[0]][6] = vcy + vcy2
-                        carbon[curr_time][col[0]][7] = vcz + vcz2
-                        offsets += [col[1]]
-                        continue
-                    else:
-                        carbon[curr_time][col[0]][5] = vcx2
-                        carbon[curr_time][col[0]][6] = vcy2
-                        carbon[curr_time][col[0]][7] = vcz2
-                        carbon[curr_time][col[1]][5] = vcx
-                        carbon[curr_time][col[1]][6] = vcy
-                        carbon[curr_time][col[1]][7] = vcz
-                if offsets:
-                    v1, v2 = min(offsets), min(offsets)
-                    offset, i = 0, v1
-                    while i < carbon.shape[1]:
-                        while i+offset in offsets:
-                            offset += 1
-                        if i + offset < carbon.shape[1]:
-                            carbon[curr_time][i] = carbon[curr_time][i+offset]
-                            carbon[curr_time][i][-1] = max_carbon_guid
-                            max_carbon_guid += 1
-                        i += 1
-                    carbons_in_process -= len(offsets)
-                    print('offsets: {}'.format(len(offsets)))
-            end = time.time()
-            print('Collisions finding elapsed time = {}'.format(end-start))
             # Solutions of differential equations
             start = time.time()
             t = np.linspace(0, TIME_STEP / Mt, 2)
@@ -455,7 +407,10 @@ def main():
                         carbon[p_next_time(absolute_time)][num][5+dim] = res[-1][1]
                     else:
                         carbon[p_next_time(absolute_time)][num][5+dim] = carbon[curr_time(absolute_time)][num][5+dim]
-            # Copy another particles arrays
+            end = time.time()
+            print('Differential equations solution elapsed time = {}'.format(end-start))
+            
+# Copy another particles arrays
             for num in range(carbons_in_process, carbon.shape[1]):
                 for l in range(carbon.shape[2]):
                     carbon[p_next_time(absolute_time)][num][l] = \
@@ -468,33 +423,155 @@ def main():
                 for l in range(helium.shape[2]):
                     helium[p_next_time(absolute_time)][num][l] = \
                         helium[curr_time][num][l]
+                        
+            # positions = [electron, carbon, helium]
+            offsets, carbon_final, tension_final = [], [], []
+            curr_time = p_next_time(absolute_time)
+            n = carbon_charge_grid.shape
+            # print(n)
+            # return
+            for num in range(carbons_in_process):
+                x_big, y_big, z_big, _, charge, _, _, _, _ = carbon[curr_time][num]
+                i, j, k = \
+                    int(x_big/X_STEP), int(y_big/Y_STEP), int(z_big/Z_STEP)
+                # Carbon logging when it reaches the end of the simulation area
+                # if num == 23:
+                #     print('23: i, j, k = {}, {}, {}'.format(i, j, k))
+                if (i<0) or (j<0) or (k<0) or (i>n[0]-2) or (j>n[1]-2) or (k>n[2]-2):
+                    offsets += [num]
+                    carbon_final += [carbon[curr_time][num]]
+                    tension_final += [carbon_tension[num]]
+            
             end = time.time()
-            print('Differential equations solution elapsed time = {}'.format(end-start))
-            db_log.new_iteration(absolute_time*TIME_STEP)
-            db_log.new_particle(carbon, carbon_tension, curr_time, carbons_in_process)
+            print('Calcing charge in cells elapsed time = {}'.format(end-start))
 
+
+
+
+            # Collision finding
+            start = time.time()
+            сarbon_collisions, electron_collisions, helium_collisions = [], [], []
+            collision_offsets = []
+            if absolute_time != 0:
+                prev_time = p_time(absolute_time)
+                curr_time = p_next_time(absolute_time)
+                сarbon_collisions = []
+                сarbon_collisions_tmp = find_carbon_collision_rust(carbon, carbons_in_process, curr_time, prev_time)
+                for col in сarbon_collisions_tmp:
+                    if col[0] in offsets or col[1] in offsets:
+                        continue
+                    e1, e2 = get_collision_energy(carbon[curr_time][col[0]], carbon[curr_time][col[1]])
+                    xc, yc, zc, radiusc, chrg, vcx, vcy, vcz, _ = carbon[curr_time][col[0]]
+                    xc2, yc2, zc2, radiusc2, chrg2, vcx2, vcy2, vcz2, _ = carbon[curr_time][col[1]]
+                    m1 = CARBONS_MASS*radiusc**3 / PARTICLE_COHESION / CARBONS_RADIUS**3
+                    m2 = CARBONS_MASS*radiusc2**3 / PARTICLE_COHESION / CARBONS_RADIUS**3
+                    if e1 + e2 > 348000:
+                        import matplotlib.pyplot as plt
+                        pxc, pyc, _, _, _, _, _, _, _ = carbon[prev_time][col[0]]
+                        pxc2, pyc2, _, _, _, _, _, _, _ = carbon[prev_time][col[1]]
+                        # plt.plot([pxc, xc], [pyc, yc], '-b')
+                        # plt.plot([pxc2, xc2], [pyc2, yc2], '-r')
+                        r = (((m1 + m2) * PARTICLE_COHESION * CARBONS_RADIUS**3) / CARBONS_MASS)**(1.0/3)
+                        carbon[curr_time][col[0]][3] = r
+                        carbon[curr_time][col[0]][4] = chrg + chrg2
+                        carbon[curr_time][col[0]][5] = vcx + vcx2
+                        carbon[curr_time][col[0]][6] = vcy + vcy2
+                        carbon[curr_time][col[0]][7] = vcz + vcz2
+                        carbon[curr_time][col[0]][-1] = max_carbon_guid
+                        max_carbon_guid += 1
+                        # plt.plot([carbon[curr_time][col[0]][0]], [carbon[curr_time][col[0]][1]], 'or')
+                        # plt.xlim(0, 0.001)
+                        # plt.ylim(0, 0.01)
+                        # plt.savefig('./picts_4/{}_{}.png'.format(col[0], col[1]))
+                        # plt.close()
+                        # fff = open('./collision.txt', 'a')
+                        # fff.write('{}\n'.format(xc))
+                        # fff.close()
+                        collision_offsets += [col[1]]
+                        # continue
+                    else:
+                        carbon[curr_time][col[0]][5] = vcx2
+                        carbon[curr_time][col[0]][6] = vcy2
+                        carbon[curr_time][col[0]][7] = vcz2
+                        carbon[curr_time][col[1]][5] = vcx
+                        carbon[curr_time][col[1]][6] = vcy
+                        carbon[curr_time][col[1]][7] = vcz
+                    сarbon_collisions += [col]
+
+            end = time.time()
+            curr_time = p_time(absolute_time)
+            print('Collisions finding elapsed time = {}'.format(end-start))
+
+            curr_time = p_next_time(absolute_time)
             def enrg(x):
                 p1 = carbon[curr_time][x[0]]
                 p2 = carbon[curr_time][x[1]]
                 e = get_collision_energy(p1, p2)
                 return (x[0], x[1], sum(e))
             сarbon_collisions = map(enrg, сarbon_collisions)
-            db_log.new_collision(сarbon_collisions)
+            db_log.new_iteration(absolute_time*TIME_STEP)
+            db_log.new_final(carbon_final, tension_final)
+            # db_log.new_collision(сarbon_collisions)
+            db_log.new_collision_2(carbon, сarbon_collisions, p_next_time(absolute_time))
+            curr_time = p_time(absolute_time)
+
+
+            curr_time = p_next_time(absolute_time)
+            if offsets:
+                v1, v2 = min(offsets), min(offsets)
+                offset, i = 0, v1
+                while i < carbon.shape[1]:
+                    while i+offset in offsets:
+                        offset += 1
+                    if i + offset < carbon.shape[1]:
+                        carbon[curr_time][i] = carbon[curr_time][i+offset]
+                    i += 1
+                carbons_in_process -= len(offsets)
+                print('offsets: {}'.format(len(offsets)))
+            curr_time = p_time(absolute_time)
+
+            curr_time = p_next_time(absolute_time)
+            if collision_offsets:
+                v1, v2 = min(collision_offsets), min(collision_offsets)
+                offset, i = 0, v1
+                while i < carbon.shape[1]:
+                    while i+offset in collision_offsets:
+                        offset += 1
+                    if i + offset < carbon.shape[1]:
+                        carbon[curr_time][i] = carbon[curr_time][i+offset]
+                        # carbon[curr_time][i][-1] = max_carbon_guid
+                        # max_carbon_guid += 1
+                    i += 1
+                carbons_in_process -= len(collision_offsets)
+                print('collision_offsets: {}'.format(len(collision_offsets)))
+
+            db_log.new_particle_2(carbon, p_next_time(absolute_time), carbons_in_process)
+            curr_time = p_time(absolute_time)
+
+            
+
+
 
 
             absolute_time += 1
+            print('PREV carbons_in_process = {}'.format(carbons_in_process))
             if absolute_time < CARBON_LAYERS_NUMBER:
                 carbons_in_process += cpl
             print('absolute time = {} '.format(absolute_time))
+            print('carbons_in_process = {}'.format(carbons_in_process))
+            # print(carbon[p_prev_time(absolute_time)][23])
+            # print(carbon[p_time(absolute_time)][23])
+            # print(offsets)
+            # print(collision_offsets)
     # except IndexError:
     #     print('IndexError')
     #     pass
     except KeyboardInterrupt:
         print('KeyboardInterrupt')
         pass
-    except OSError:
-        print('OSError')
-        pass
+    # except OSError:
+    #     print('OSError')
+    #     pass
 
 
 if __name__ == '__main__':
