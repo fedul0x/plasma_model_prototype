@@ -31,7 +31,7 @@ def restore_from_dump(dumpfolder, conds):
 
         def check(x):
             if conds.get(x[0], None) is None or\
-            x[0] == 'TIME_STEP':
+            x[0] == 'TIME_STEP' or x[0] == 'DB_FILE' or x[0] == 'DUMP_FOLDER':
                 return True
             else:
                 return x[1] == conds[x[0]]
@@ -92,6 +92,20 @@ class DbConnection:
         sql = 'select max(id) from particle'
         self.particle_last_id = self.cursor.execute(sql).fetchone()[0]
 
+    def new_particle_2(self, carbon, currtime, carbonum):
+        for i in range(carbonum):
+            c = ', '.join([str(carbon[currtime][i][j]) for j in range(9)])
+            t = ' 0, 0, 0 '
+            sql = '''insert into particle (id_iteration, pos_x, pos_y, pos_z,
+                radius, charge, speed_x, speed_y, speed_z, guid,
+                tension_x, tension_y, tension_z)
+                VALUES ({}, {}, {})'''\
+                .format(self.iteration_last_id, c, t)
+            self.cursor.execute(sql)
+        self.connection.commit()
+        sql = 'select max(id) from particle'
+        self.particle_last_id = self.cursor.execute(sql).fetchone()[0]
+
     def new_collision(self, collisions):
         for i in collisions:
             # TODO rewrite i[0]+self.particle_last_id, i[1]+self.particle_last_id
@@ -102,6 +116,25 @@ class DbConnection:
                 id_particle_1, id_particle_2, energy)
                 VALUES ({}, {}, {}, {})'''\
                 .format(self.iteration_last_id, id1, id2, e)
+            self.cursor.execute(sql)
+        self.connection.commit()
+    
+    def new_collision_2(self, carbon, collisions, currtime):
+        for i in collisions:
+            # TODO rewrite i[0]+self.particle_last_id, i[1]+self.particle_last_id
+            # TODO calc energy
+            # id1, id2, e = \
+            #     i[0]+self.particle_last_id, i[1]+self.particle_last_id, i[2]
+            c1 = ', '.join([str(carbon[currtime][i[0]][j]) for j in range(3)])
+            c2 = ', '.join([str(carbon[currtime][i[1]][j]) for j in range(3)])
+            sql = '''insert into collision2 (id_iteration,
+                pos_x_1, pos_y_1, pos_z_1, pos_x_2, pos_y_2, pos_z_2, energy)
+                VALUES ({}, {}, {}, {})'''\
+                .format(self.iteration_last_id, c1, c2, i[2])
+            # sql = '''insert into collision (id_iteration,
+            #     id_particle_1, id_particle_2, energy)
+            #     VALUES ({}, {}, {}, {})'''\
+            #     .format(self.iteration_last_id, id1, id2, e)
             self.cursor.execute(sql)
         self.connection.commit()
 
